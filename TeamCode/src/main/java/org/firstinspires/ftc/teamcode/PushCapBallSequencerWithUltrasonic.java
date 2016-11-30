@@ -70,7 +70,7 @@ public class PushCapBallSequencerWithUltrasonic extends OpMode {
 
         timer = new ElapsedTime();
         state = stateMachine.start;
-        drive = new MecanumDrive(rf, rb, lf, lb, null, null, null, null, telemetry, null);
+        drive = new MecanumDrive(rf, rb, lf, lb, null, null, ultrasonic, null, telemetry, null);
     }
 
     public int average2Motors(int a, int b) {
