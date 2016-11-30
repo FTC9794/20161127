@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -18,6 +19,7 @@ import java.io.File;
  * Created by Ishaan Oberoi on 11/26/2016.
  */
 @Autonomous(name = "push cap", group = "basic auto")
+@Disabled
 public class TestAuto extends LinearOpMode {
 
     DcMotor rf, rb, lf, lb;

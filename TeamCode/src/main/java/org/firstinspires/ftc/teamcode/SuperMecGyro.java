@@ -1,25 +1,22 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
-import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.ReadWriteFile;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.internal.AppUtil;
-
-import java.io.File;
 
 /**
  * Created by Ishaan Oberoi on 11/26/2016.
  */
-@TeleOp(name = "TeleOp 1", group = "drive train prototypes")
-public class JoystickIMUTeleop extends OpMode {
+@TeleOp(name = "TeleOp 2", group = "drive train prototypes")
+public class SuperMecGyro extends OpMode {
     DcMotor rf;
     DcMotor rb;
     DcMotor lf;
@@ -36,10 +33,9 @@ public class JoystickIMUTeleop extends OpMode {
     ElapsedTime harvestToggleTimer;
     double speed;
     double angle;
-    double IMUAngle;
+    double gyroAngle;
     double pivotSpeed;
-    BNO055IMU imu;
-    Orientation q;
+    ModernRoboticsI2cGyro gyro;
     boolean shooterToggle;
     boolean harvestToggle;
     @Override
@@ -56,7 +52,8 @@ public class JoystickIMUTeleop extends OpMode {
         lb.setDirection(DcMotorSimple.Direction.REVERSE);
         sweeper.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        drive = new MecanumDrive(rf, rb, lf, lb, imu, null, null, null, telemetry, null);
+        gyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
+        drive = new MecanumDrive(rf, rb, lf, lb, null, null, null, gyro, telemetry, null);
 
         leftBeacon = hardwareMap.servo.get("left_beacon");
         rightBeacon = hardwareMap.servo.get("right_beacon");
@@ -69,9 +66,11 @@ public class JoystickIMUTeleop extends OpMode {
         shooterToggle = false;
         harvestToggle = false;
 
-        shooterTime = new ElapsedTime();
-        beaconTimer = new ElapsedTime();
-        shooterToggleTimer = new ElapsedTime();        harvestToggleTimer = new ElapsedTime();
+        shooterTime = new ElapsedTime();;
+        shooterToggleTimer = new ElapsedTime();
+        harvestToggleTimer = new ElapsedTime();
+
+        gyro.calibrate();
 
 /*
         // We are expecting the IMU to be attached to an I2C port on a Core Device Interface Module and named "imu".
@@ -102,11 +101,13 @@ public class JoystickIMUTeleop extends OpMode {
 
     @Override
     public void loop() {
+
         angle = drive.joystickToAngle(gamepad1.left_stick_x, -gamepad1.left_stick_y);
         speed = drive.returnRadius(gamepad1.left_stick_x, -gamepad1.left_stick_y);
-        /*q = imu.getAngularOrientation();
-        IMUAngle = q.firstAngle;
-        angle += IMUAngle;*/
+        gyroAngle = gyro.getIntegratedZValue();
+        angle += gyroAngle;
+        telemetry.addData("gyro angle: ", gyroAngle);
+
         pivotSpeed = -gamepad1.right_stick_x;
         telemetry.addData("Angle: ", angle);
         telemetry.addData("Speed: ", speed);
@@ -114,8 +115,7 @@ public class JoystickIMUTeleop extends OpMode {
         if(gamepad1.left_trigger>.1){
             speed*=.5;
         }
-        drive.pivotSlide(angle, speed, true, pivotSpeed);
-        /*
+        drive.pivotSlide(angle, speed, true, pivotSpeed);/*
         if(gamepad1.b){
             beaconTimer.reset();
             leftBeacon.setPosition(0);
@@ -125,45 +125,46 @@ public class JoystickIMUTeleop extends OpMode {
             leftBeacon.setPosition(1);
             rightBeacon.setPosition(1);
         }*/
-        if(shooterToggleTimer.seconds()>1){
-            if(gamepad2.b){
-                if(shooterToggle){
-                    shooter.setPower(0);
-                    shooterToggle = false;
-                }else{
-                    shooter.setPower(.4);
-                    shooterToggle = true;
+            if(shooterToggleTimer.seconds()>1){
+                if(gamepad2.b){
+                    if(shooterToggle){
+                        shooter.setPower(0);
+                        shooterToggle = false;
+                    }else{
+                        shooter.setPower(.4);
+                        shooterToggle = true;
+                    }
+                    shooterToggleTimer.reset();
                 }
-                shooterToggleTimer.reset();
+
             }
 
-        }
-
-        if(gamepad2.x){
-            shooterGate.setPosition(0);
-            shooterTime.reset();
-        }
-        if(shooterTime.milliseconds()>75){
-            shooterGate.setPosition(.5);
-        }
-
-        if(harvestToggleTimer.seconds()>.5){
-            if(gamepad2.y){
-                if(harvestToggle){
-                    sweeper.setPower(0);
-                    harvestToggle = false;
-
-                }else{
-                    sweeper.setPower(1);
-                    harvestToggle = true;
-                }
-                harvestToggleTimer.reset();
+            if(gamepad2.x){
+                shooterGate.setPosition(0);
+                shooterTime.reset();
+            }
+            if(shooterTime.milliseconds()>75){
+                shooterGate.setPosition(.5);
             }
 
-        }
-        if(gamepad2.a){
-            sweeper.setPower(-1);
-        }
+            if(harvestToggleTimer.seconds()>.5){
+                if(gamepad2.y){
+                    if(harvestToggle){
+                        sweeper.setPower(0);
+                        harvestToggle = false;
+
+                    }else{
+                        sweeper.setPower(1);
+                        harvestToggle = true;
+                    }
+                    harvestToggleTimer.reset();
+                }
+
+            }
+            if(gamepad2.a){
+                sweeper.setPower(-1);
+            }
+
 
     }
 }

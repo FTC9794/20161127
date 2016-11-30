@@ -16,10 +16,10 @@ import org.firstinspires.ftc.robotcore.internal.AppUtil;
 import java.io.File;
 
 /**
- * Created by Ishaan Oberoi on 11/26/2016.
+ * Created by Ishaan Oberoi on 11/29/2016.
  */
-@TeleOp(name = "TeleOp 1", group = "drive train prototypes")
-public class JoystickIMUTeleop extends OpMode {
+@TeleOp(group = "Mecanum Drive", name = "TeleOp 3")
+public class SuperMecIMU extends OpMode {
     DcMotor rf;
     DcMotor rb;
     DcMotor lf;
@@ -73,7 +73,6 @@ public class JoystickIMUTeleop extends OpMode {
         beaconTimer = new ElapsedTime();
         shooterToggleTimer = new ElapsedTime();        harvestToggleTimer = new ElapsedTime();
 
-/*
         // We are expecting the IMU to be attached to an I2C port on a Core Device Interface Module and named "imu".
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
@@ -96,7 +95,6 @@ public class JoystickIMUTeleop extends OpMode {
         File file = AppUtil.getInstance().getSettingsFile(filename);
         ReadWriteFile.writeFile(file, calibrationData.serialize());
         parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
-*/
 
     }
 
@@ -104,9 +102,9 @@ public class JoystickIMUTeleop extends OpMode {
     public void loop() {
         angle = drive.joystickToAngle(gamepad1.left_stick_x, -gamepad1.left_stick_y);
         speed = drive.returnRadius(gamepad1.left_stick_x, -gamepad1.left_stick_y);
-        /*q = imu.getAngularOrientation();
+        q = imu.getAngularOrientation();
         IMUAngle = q.firstAngle;
-        angle += IMUAngle;*/
+        angle += IMUAngle;
         pivotSpeed = -gamepad1.right_stick_x;
         telemetry.addData("Angle: ", angle);
         telemetry.addData("Speed: ", speed);

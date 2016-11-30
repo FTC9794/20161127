@@ -342,7 +342,7 @@ public class MecanumDrive {
         //traveling at
         horizontal = round2D(calculateX(angle, speed));
         vertical = round2D(calculateY(angle, speed));
-
+        telemetry.addData("vertical", vertical);
         //determine the powers using the new X and Y values and the other joystick to pivot
         if (condition) {
             rf.setPower((vertical - horizontal) * .5);

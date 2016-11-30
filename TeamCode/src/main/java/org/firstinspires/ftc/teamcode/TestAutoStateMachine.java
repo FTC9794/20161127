@@ -4,6 +4,7 @@ import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -17,6 +18,7 @@ import java.io.File;
  * Created by Ishaan Oberoi on 11/27/2016.
  */
 @Autonomous(name = "state machine test", group = "simple auto")
+@Disabled
 public class TestAutoStateMachine extends OpMode {
     DcMotor rf, rb, lf, lb;
     enum StateMachine {
