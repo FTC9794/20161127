@@ -7,12 +7,15 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.ReadWriteFile;
 
+import org.firstinspires.ftc.robotcore.internal.AppUtil;
 import org.firstinspires.ftc.teamcode.DataLogger;
 import org.lasarobotics.vision.android.Cameras;
 import org.lasarobotics.vision.ftc.resq.Beacon;
@@ -20,11 +23,13 @@ import org.lasarobotics.vision.opmode.VisionOpMode;
 import org.lasarobotics.vision.opmode.extensions.CameraControlExtension;
 import org.opencv.core.Size;
 
+import java.io.File;
+
 /**
  * Created by Ishaan Oberoi on 11/26/2016.
  */
 @Autonomous(name = "test auto methods")
-public class AutoBlueNewDrive extends VisionOpMode {
+public class AutoBlueNewDrive extends OpMode {
     DcMotor lf, lb, rf, rb;
     // The IMU sensor object
     BNO055IMU imu;
@@ -38,7 +43,7 @@ public class AutoBlueNewDrive extends VisionOpMode {
     ModernRoboticsI2cColorSensor color;
     //states in sequencer
     enum stateMachine {
-        slideState, timeDelay, testTelemetry, grip, pivotCapBall, getColor, goToBeacon2Line, transition, retractServos, start, estop, delay, slide45Distance, slide90Ultrasonic, slide0light, waitBeforeGoingBack, slide180Light, pivotTo0Time, slideToBeacon, pushBeacon, checkColor, waitForBeaconPusher, retractBeaconPusher, slideNeg45ToBeacon2, slide30in, testGetToPosition, slide45Cap, pivotToNeg45, slide20US, capBall, stop
+        slideState, timeDelay, testTelemetry, grip, pivotCapBall, getColor, goToBeacon2Line, transition, retractServos, start, estop, slide45Distance, slide90Ultrasonic, slide0light, waitBeforeGoingBack, slide180Light, pivotTo0Time, slideToBeacon, pushBeacon, checkColor, waitForBeaconPusher, retractBeaconPusher, slideNeg45ToBeacon2, slide30in, testGetToPosition, slide45Cap, pivotToNeg45, slide20US, capBall, stop
     };
     stateMachine state;
     //dataloger
@@ -51,87 +56,35 @@ public class AutoBlueNewDrive extends VisionOpMode {
     String rightOrLeft;
     Object[][] sequenceArray = new Object[][]{
             {stateMachine.start},
-            {stateMachine.start},
             {stateMachine.timeDelay, 2},
-            {stateMachine.slideState, 45, 1.0, 2, -3341.953451, 0.0, 0.05},
-            //{stateMachine.slideState, 90, .75, 3, 47, 0.0, 0.04},
-            // {stateMachine.slideState, 0, .25, 6, .15, 0.0, 0.02},
-
-            //{stateMachine.slideState, 90, .25, 3, 20, 0.0, 0.02},
+            {stateMachine.slideState, 45, 1.0, 1, 341.953451, 0.0, 0.05},
+            {stateMachine.stop, 90, .75, 3, 47.0, 0.0, 0.05},
+            {stateMachine.slideState, 0, 0.25, 6, 0.15, 0.0, 0.005},
+            {stateMachine.getColor},
+            {stateMachine.slideState, 100, 0.5, 3, 15.0, 0.0, 0.005},
+            {stateMachine.slideState, 0, 0.15, 6, 0.15, 0.0, 0.005},
+            {stateMachine.slideState, 180, 0.15, 6, 0.15, 0.0, 0.005},
+            {stateMachine.slideState, 90, 0.17, 3, .0, 0.0, 0.05},
+            {stateMachine.grip, 1.0, 1.5},
+            {stateMachine.pushBeacon, 0, 1.0},
+            {stateMachine.grip, -1.0, 1.5},
+            {stateMachine.slideState, 315, 0.45, 4, 43.0, 0.0, 0.007},
+            {stateMachine.slideState, 0, 0.35, 6, 0.15, 0.0, 0.008},
+            {stateMachine.getColor},
+            {stateMachine.slideState, 100, 0.5, 3, 15.0, 0.0, 0.005},
+            {stateMachine.slideState, 0, 0.15, 6, 0.15, 0.0, 0.005},
+            {stateMachine.slideState, 180, 0.15, 6, 0.17, 0.0, 0.005},
+            {stateMachine.slideState, 90, 0.22, 3, 8.0, 0.0, 0.05},
+            {stateMachine.grip, 1.0, 1.5},
+            {stateMachine.pushBeacon, 0, 1.0},
+            {stateMachine.grip, -1.0, 1.5},
             {stateMachine.stop}
+
     };
+
+    int counter = 0;
     @Override
     public void init() {
-        super.init();
-        /**
-         * Set the camera used for detection
-         * PRIMARY = Front-facing, larger camera
-         * SECONDARY = Screen-facing, "selfie" camera :D
-         **/
-        this.setCamera(Cameras.PRIMARY);
-
-        /**
-         * Set the frame size
-         * Larger = sometimes more accurate, but also much slower
-         * After this method runs, it will set the "width" and "height" of the frame
-         **/
-        this.setFrameSize(new Size(900, 900));
-
-        /**
-         * Enable extensions. Use what you need.
-         * If you turn on the BEACON extension, it's best to turn on ROTATION too.
-         */
-        enableExtension(Extensions.BEACON);         //Beacon detection
-        enableExtension(Extensions.ROTATION);       //Automatic screen rotation correction
-        enableExtension(Extensions.CAMERA_CONTROL); //Manual camera control
-
-        /**
-         * Set the beacon analysis method
-         * Try them all and see what works!
-         */
-        beacon.setAnalysisMethod(Beacon.AnalysisMethod.COMPLEX);
-
-        /**
-         * Set color tolerances
-         * 0 is default, -1 is minimum and 1 is maximum tolerance
-         */
-        beacon.setColorToleranceRed(0);
-        beacon.setColorToleranceBlue(0);
-
-        /**
-         * Set analysis boundary
-         * You should comment this to use the entire screen and uncomment only if
-         * you want faster analysis at the cost of not using the entire frame.
-         * This is also particularly useful if you know approximately where the beacon is
-         * as this will eliminate parts of the frame which may cause problems
-         * This will not work on some methods, such as COMPLEX
-         **/
-        //beacon.setAnalysisBounds(new Rectangle(new Point(width / 2, height / 2), width - 200, 200));
-
-        /**
-         * Set the rotation parameters of the screen
-         * If colors are being flipped or output appears consistently incorrect, try changing these.
-         *
-         * First, tell the extension whether you are using a secondary camera
-         * (or in some devices, a front-facing camera that reverses some colors).
-         *
-         * It's a good idea to disable global auto rotate in Android settings. You can do this
-         * by calling disableAutoRotate() or enableAutoRotate().
-         *
-         * It's also a good idea to force the phone into a specific orientation (or auto rotate) by
-         * calling either setActivityOrientationAutoRotate() or setActivityOrientationFixed(). If
-         * you don't, the camera reader may have problems reading the current orientation.
-         */
-        rotation.setIsUsingSecondaryCamera(false);
-
-        /**
-         * Set camera control extension preferences
-         *
-         * Enabling manual settings will improve analysis rate and may lead to better results under
-         * tested conditions. If the environment changes, expect to change these values.
-         */
-        cameraControl.setColorTemperature(CameraControlExtension.ColorTemperature.AUTO);
-        cameraControl.setAutoExposureCompensation();
         //call motors from hardware map
         rf = hardwareMap.dcMotor.get("right_front");
         rb = hardwareMap.dcMotor.get("right_back");
@@ -165,20 +118,9 @@ public class AutoBlueNewDrive extends VisionOpMode {
        // light = hardwareMap.get(ModernRoboticsAnalogOpticalDistanceSensor.class, "light");
 
 
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
-        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-        // and named "imu".
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
-        timer = new ElapsedTime();
 
+        timer = new ElapsedTime();
+        timer.reset();
         firstDistance *= 127.5;
         state = stateMachine.start;
         drive = new MecanumDrive(rf, rb, lf, lb, imu, light, ultrasonic, null, telemetry, timer);
@@ -186,7 +128,27 @@ public class AutoBlueNewDrive extends VisionOpMode {
         beaconPresssed = 0;
         seqCounter = 0;
     }
+    @Override
+    public void init_loop(){
+        if (counter == 0){
+            BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+            parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+            parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+            parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
+            parameters.loggingEnabled      = true;
+            parameters.loggingTag          = "IMU";
+            parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
+            // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+            // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+            // and named "imu".
+            imu = hardwareMap.get(BNO055IMU.class, "imu");
+            imu.initialize(parameters);
+            counter++;
+        }else{
+            telemetry.addData("Done with init", "press play");
+        }
+    }
     public int average2Motors(int a, int b) {
         return (int) (a + b) / 2;
     }
@@ -198,34 +160,23 @@ public class AutoBlueNewDrive extends VisionOpMode {
         switch ((stateMachine) sequenceArray[seqCounter][0]) {
             case start:
                 seqCounter++;
-                telemetry.addData("stae", "start");
                 timer.reset();
                 break;
 
             case timeDelay:
                 if (timer.seconds() < (int) sequenceArray[seqCounter][1]) {
-                    //          telemetry.addData("state", "delay");
-                    //        telemetry.addData("time", timer.seconds());
-                    //       telemetry.addData("delay", (int) sequenceArray[seqCounter][1]);
+
                 } else {
                     seqCounter++;
                     timer.reset();
                     drive.resetEncoders();
                 }
+                telemetry.addData("state", "delay");
+                telemetry.addData("time", timer.seconds());
                 break;
 
             case getColor:
-                rightOrLeft = beacon.getAnalysis().getColorString();
-                if(rightOrLeft.equals("???, ???")||beacon.getAnalysis().getConfidence()<.05){
-                    rightOrLeft = beacon.getAnalysis().getColorString();
-                    telemetry.addData("color", rightOrLeft);
-                    telemetry.addData("Confidence", beacon.getAnalysis().getConfidence());
-                }
-                else{
-                    timer.reset();
-                    drive.resetEncoders();
-                    seqCounter++;
-                }
+
                 break;
 
             case grip:

@@ -22,7 +22,7 @@ import org.opencv.core.Size;
 /**
  * Created by Ishaan Oberoi on 11/26/2016.
  */
-@Autonomous(name = "Autonomous 2a")
+@Autonomous(group = "auto", name = "Autonomous 2a")
 public class PushCapBallSequencer extends OpMode {
     DcMotor lf, lb, rf, rb;
     ElapsedTime timer;

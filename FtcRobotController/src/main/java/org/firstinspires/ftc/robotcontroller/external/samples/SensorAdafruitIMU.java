@@ -97,7 +97,6 @@ public class SensorAdafruitIMU extends LinearOpMode
 
         // Set up our telemetry dashboard
         composeTelemetry();
-
         // Wait until we're told to go
         waitForStart();
 

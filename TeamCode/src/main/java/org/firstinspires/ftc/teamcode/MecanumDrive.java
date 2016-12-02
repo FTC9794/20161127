@@ -427,14 +427,13 @@ public class MecanumDrive {
         //return the new X and Y values using the angle needed and the speed the robot was
         //traveling at
 
+
         horizontal = round2D(calculateX(slideDirection, speed));
         vertical = round2D(calculateY(slideDirection, speed));
         Orientation o = imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
         double ox = formatAngle(o.angleUnit, o.firstAngle);
-        double gyroAngle = ox;/*
-        if(ox>orientation+180){
-            ox-=360;
-        }*/
+        double gyroAngle = ox;
+
         double pivotCorrection = -((orientation - gyroAngle) * oGain);
         //determine the powers using the new X and Y values and the other joystick to pivot
         if (condition) {

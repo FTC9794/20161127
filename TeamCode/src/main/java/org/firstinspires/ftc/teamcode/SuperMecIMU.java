@@ -42,6 +42,7 @@ public class SuperMecIMU extends OpMode {
     Orientation q;
     boolean shooterToggle;
     boolean harvestToggle;
+    double offset;
     @Override
     public void init() {
         rf = hardwareMap.dcMotor.get("right_front");
@@ -95,6 +96,7 @@ public class SuperMecIMU extends OpMode {
         File file = AppUtil.getInstance().getSettingsFile(filename);
         ReadWriteFile.writeFile(file, calibrationData.serialize());
         parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
+        offset = AutonomousBlueIMULinear.endGyro;
 
     }
 
@@ -104,7 +106,7 @@ public class SuperMecIMU extends OpMode {
         speed = drive.returnRadius(gamepad1.left_stick_x, -gamepad1.left_stick_y);
         q = imu.getAngularOrientation();
         IMUAngle = q.firstAngle;
-        angle += IMUAngle;
+        angle += IMUAngle + offset;
         pivotSpeed = -gamepad1.right_stick_x;
         telemetry.addData("Angle: ", angle);
         telemetry.addData("Speed: ", speed);

@@ -52,7 +52,7 @@ public class SuperMecGyro extends OpMode {
         lb.setDirection(DcMotorSimple.Direction.REVERSE);
         sweeper.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        gyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
+        gyro = (ModernRoboticsI2cGyro)hardwareMap.gyroSensor.get("gyro");
         drive = new MecanumDrive(rf, rb, lf, lb, null, null, null, gyro, telemetry, null);
 
         leftBeacon = hardwareMap.servo.get("left_beacon");
@@ -71,31 +71,6 @@ public class SuperMecGyro extends OpMode {
         harvestToggleTimer = new ElapsedTime();
 
         gyro.calibrate();
-
-/*
-        // We are expecting the IMU to be attached to an I2C port on a Core Device Interface Module and named "imu".
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
-        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
-        // Get the calibration data
-        BNO055IMU.CalibrationData calibrationData = imu.readCalibrationData();
-
-        // Save the calibration data to a file. You can choose whatever file
-        // name you wish here, but you'll want to indicate the same file name
-        // when you initialize the IMU in an opmode in which it is used. If you
-        // have more than one IMU on your robot, you'll of course want to use
-        // different configuration file names for each.
-        String filename = "AdafruitIMUCalibration.json";
-        File file = AppUtil.getInstance().getSettingsFile(filename);
-        ReadWriteFile.writeFile(file, calibrationData.serialize());
-        parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
-*/
 
     }
 

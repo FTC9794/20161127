@@ -62,7 +62,7 @@ public abstract class LinearVisionOpMode extends VisionOpMode {
     public final void waitForVisionStart() throws InterruptedException {
         //Give some status info
         //telemetry.addData("Vision Status", "Initializing...\r\n" +
-          //      "Please wait, do not stop the OpMode.");
+        //      "Please wait, do not stop the OpMode.");
 
         while (!this.isInitialized()) {
             synchronized (this) {

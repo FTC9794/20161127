@@ -45,7 +45,7 @@ import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 @TeleOp(name = "Sensor: MR ODS", group = "Sensor")
-@Disabled
+//@Disabled
 public class SensorMROpticalDistance extends LinearOpMode {
 
   OpticalDistanceSensor odsSensor;  // Hardware Device Object
@@ -54,7 +54,7 @@ public class SensorMROpticalDistance extends LinearOpMode {
   public void runOpMode() {
 
     // get a reference to our Light Sensor object.
-    odsSensor = hardwareMap.opticalDistanceSensor.get("sensor_ods");
+    odsSensor = hardwareMap.opticalDistanceSensor.get("light");
 
     // wait for the start button to be pressed.
     waitForStart();
