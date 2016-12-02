@@ -415,5 +415,10 @@ public class BlueParticles extends LinearVisionOpMode {
         }
 
     }
+    @Override
+    public void stop(){
+        super.stop();
+        endGyro = 270;
+    }
 
 }

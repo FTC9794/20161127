@@ -130,7 +130,7 @@ public abstract class LinearVisionOpMode extends VisionOpMode {
     }
 
     @Override
-    public final void stop() {
+    public void stop() {
         super.stop();
         this.opModeStarted = false;
         this.rgba.release();

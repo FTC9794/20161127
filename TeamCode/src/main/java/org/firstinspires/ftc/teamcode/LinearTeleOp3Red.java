@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.ReadWriteFile;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
@@ -20,8 +19,8 @@ import java.io.File;
  * Created by Ishaan Oberoi on 12/1/2016.
  */
 
-@TeleOp(group = "Mecanum Drive", name = "TeleOp 3 Linear Blue")
-public class LinearTeleOp3 extends LinearOpMode{
+@TeleOp(group = "Mecanum Drive", name = "TeleOp 3 Linear Red")
+public class LinearTeleOp3Red extends LinearOpMode{
     DcMotor rf;
     DcMotor rb;
     DcMotor lf;
@@ -116,7 +115,7 @@ public class LinearTeleOp3 extends LinearOpMode{
         // and named "imu".
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
-        offset = AutonomousBlueIMULinear.endGyro;
+        offset = AutonomousRedIMULinear.endGyro;
         telemetry.addData("init", "done");
         telemetry.update();
         waitForStart();

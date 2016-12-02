@@ -440,5 +440,13 @@ public class AutonomousRedIMULinear extends LinearVisionOpMode {
         }
 
     }
+    @Override
+    public void stop(){
+        super.stop();
+        endGyro = -imu.getAngularOrientation().firstAngle + 180;
+        if(endGyro>=360){
+            endGyro -= 180;
+        }
+    }
 
 }

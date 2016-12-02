@@ -418,8 +418,6 @@ public class AutonomousBlueIMULinear extends LinearVisionOpMode {
                     drive.setPowerAll(0, 0, 0, 0);
                     telemetry.addData("state", "stop");
                     telemetry.addData("color", rightOrLeft);
-                    Orientation o = imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
-                    endGyro = formatAngle(o.angleUnit, o.firstAngle);
                     break;
                 case shootParticle:
                     if(timer.seconds()<2){
@@ -443,6 +441,11 @@ public class AutonomousBlueIMULinear extends LinearVisionOpMode {
             telemetry.update();
         }
 
+    }
+    @Override
+    public void stop(){
+        super.stop();
+        endGyro = -imu.getAngularOrientation().firstAngle;
     }
 
 }
