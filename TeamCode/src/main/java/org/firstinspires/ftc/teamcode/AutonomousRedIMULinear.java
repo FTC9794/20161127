@@ -30,7 +30,7 @@ import java.util.Locale;
 /**
  * Created by Ishaan Oberoi on 12/1/2016.
  */
-@Autonomous(group = "auto", name = "linear Auto Red")
+@Autonomous(group = "auto", name = "Auto Red")
 public class AutonomousRedIMULinear extends LinearVisionOpMode {
     DcMotor lf, lb, rf, rb, shooter, sweeper;
     // The IMU sensor object

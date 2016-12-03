@@ -18,7 +18,7 @@ import java.io.File;
 /**
  * Created by Ishaan Oberoi on 11/26/2016.
  */
-@TeleOp(name = "TeleOp 1", group = "drive train prototypes")
+@TeleOp(name = "TeleOp no gyro", group = "drive train prototypes")
 public class JoystickIMUTeleop extends OpMode {
     DcMotor rf;
     DcMotor rb;

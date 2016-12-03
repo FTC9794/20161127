@@ -22,7 +22,7 @@ import java.util.Date;
 /**
  * Created by Sarthak on 11/7/2016.
  */
-@Autonomous(name = "Auto Blue Full Array Version 3", group = "Autonomous")
+//@Autonomous(name = "Auto Blue Full Array Version 3", group = "Autonomous")
 public class AutoBlueFullArrayv3 extends VisionOpMode {
     DcMotor lf, lb, rf, rb;
     Servo buttonPusherLeft;

@@ -28,7 +28,7 @@ import java.io.File;
 /**
  * Created by Ishaan Oberoi on 11/26/2016.
  */
-@Autonomous(name = "test auto methods")
+//@Autonomous(name = "test auto methods")
 public class AutoBlueNewDrive extends OpMode {
     DcMotor lf, lb, rf, rb;
     // The IMU sensor object

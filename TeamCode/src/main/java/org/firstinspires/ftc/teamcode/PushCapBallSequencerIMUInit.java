@@ -17,7 +17,7 @@ import java.io.File;
 /**
  * Created by Ishaan Oberoi on 11/26/2016.
  */
-@Autonomous(group = "auto", name = "Autonomous 2a+")
+//@Autonomous(group = "auto", name = "Autonomous 2a+")
 public class PushCapBallSequencerIMUInit extends OpMode {
     DcMotor lf, lb, rf, rb;
     ElapsedTime timer;

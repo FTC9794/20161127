@@ -29,7 +29,7 @@ import java.util.Locale;
 /**
  * Created by Ishaan Oberoi on 12/1/2016.
  */
-@Autonomous(group = "auto", name = "blue particles")
+@Autonomous(group = "auto", name = "Ball Shooting Autonomous")
 public class BlueParticles extends LinearVisionOpMode {
     DcMotor lf, lb, rf, rb, shooter, sweeper;
     // The IMU sensor object

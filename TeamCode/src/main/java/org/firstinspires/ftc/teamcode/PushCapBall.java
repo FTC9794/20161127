@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 /**
  * Created by Ishaan Oberoi on 11/29/2016.
  */
-@Autonomous(group = "mecanum", name = "autonomous 1")
+//@Autonomous(group = "mecanum", name = "autonomous 1")
 public class PushCapBall extends OpMode {
     DcMotor lf, lb, rf, rb;
     ElapsedTime timer;

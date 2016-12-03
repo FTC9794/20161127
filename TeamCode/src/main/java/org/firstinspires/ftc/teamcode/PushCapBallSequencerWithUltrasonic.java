@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 /**
  * Created by Ishaan Oberoi on 11/26/2016.
  */
-@Autonomous(group = "auto", name = "Autonomous 2b")
+//@Autonomous(group = "auto", name = "Autonomous 2b")
 public class PushCapBallSequencerWithUltrasonic extends OpMode {
     DcMotor lf, lb, rf, rb;
     ElapsedTime timer;

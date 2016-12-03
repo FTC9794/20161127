@@ -18,8 +18,7 @@ import java.io.File;
 /**
  * Created by Ishaan Oberoi on 11/26/2016.
  */
-@Autonomous(name = "push cap", group = "basic auto")
-@Disabled
+//@Autonomous(name = "push cap", group = "basic auto")
 public class TestAuto extends LinearOpMode {
 
     DcMotor rf, rb, lf, lb;

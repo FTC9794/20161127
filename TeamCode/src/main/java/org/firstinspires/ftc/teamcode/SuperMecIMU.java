@@ -18,7 +18,7 @@ import java.io.File;
 /**
  * Created by Ishaan Oberoi on 11/29/2016.
  */
-@TeleOp(group = "Mecanum Drive", name = "TeleOp 3")
+//@TeleOp(group = "Mecanum Drive", name = "TeleOp 3")
 public class SuperMecIMU extends OpMode {
     DcMotor rf;
     DcMotor rb;

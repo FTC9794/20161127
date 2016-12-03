@@ -15,7 +15,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 /**
  * Created by Ishaan Oberoi on 11/26/2016.
  */
-@TeleOp(name = "TeleOp 2", group = "drive train prototypes")
+//@TeleOp(name = "TeleOp 2", group = "drive train prototypes")
 public class SuperMecGyro extends OpMode {
     DcMotor rf;
     DcMotor rb;

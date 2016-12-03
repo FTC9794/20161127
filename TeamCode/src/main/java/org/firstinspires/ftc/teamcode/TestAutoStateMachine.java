@@ -17,8 +17,7 @@ import java.io.File;
 /**
  * Created by Ishaan Oberoi on 11/27/2016.
  */
-@Autonomous(name = "state machine test", group = "simple auto")
-@Disabled
+//@Autonomous(name = "state machine test", group = "simple auto")
 public class TestAutoStateMachine extends OpMode {
     DcMotor rf, rb, lf, lb;
     enum StateMachine {

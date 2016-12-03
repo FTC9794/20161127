@@ -44,7 +44,7 @@ public class LinearTeleOp3ShootBalls extends LinearOpMode{
     boolean shooterToggle;
     boolean harvestToggle;
     double offset;
-    double shootingSpeed = .4;
+    double shootingSpeed = .325;
     @Override
     public void runOpMode() throws InterruptedException {
         rf = hardwareMap.dcMotor.get("right_front");

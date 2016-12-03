@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
+import org.lasarobotics.vision.opmode.LinearVisionOpMode;
 
 import java.io.File;
 
@@ -20,7 +21,7 @@ import java.io.File;
  * Created by Ishaan Oberoi on 12/1/2016.
  */
 
-@TeleOp(group = "Mecanum Drive", name = "TeleOp 3 Linear Blue")
+@TeleOp(group = "Mecanum Drive", name = "TeleOp Blue")
 public class LinearTeleOp3 extends LinearOpMode{
     DcMotor rf;
     DcMotor rb;
@@ -45,7 +46,7 @@ public class LinearTeleOp3 extends LinearOpMode{
     boolean shooterToggle;
     boolean harvestToggle;
     double offset;
-    double shootingSpeed = .4;
+    double shootingSpeed = .325;
     @Override
     public void runOpMode() throws InterruptedException {
         rf = hardwareMap.dcMotor.get("right_front");

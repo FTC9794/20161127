@@ -26,7 +26,7 @@ import java.io.File;
 /**
  * Created by Ishaan Oberoi on 12/1/2016.
  */
-@Autonomous(group = "auto", name = "linear Auto Blue test")
+//@Autonomous(group = "auto", name = "linear Auto Blue test")
 public class AutonomousBlueIMULinearTest extends LinearVisionOpMode {
     DcMotor lf, lb, rf, rb;
     // The IMU sensor object

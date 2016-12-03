@@ -459,7 +459,6 @@ public class MecanumDrive {
     // the angle that the joystick is at relative to the center of the joystcik
     // returns in degrees
     public double joystickToAngle(double x, double y) {
-
         return Math.atan2(x, y) * (180 / Math.PI);
     }
 
