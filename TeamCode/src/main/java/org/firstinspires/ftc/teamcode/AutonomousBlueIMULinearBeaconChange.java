@@ -65,7 +65,7 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
             {stateMachine.slideState, 90, .75, 3, 10.0, 0.0, 0.01},
             {stateMachine.retractBeacon},
             {stateMachine.startShooter, 0.31},
-            {stateMachine.slideState, -90, 0.5, 4, 45.0, 0.0, 0.01},
+            {stateMachine.slideState, -90, 0.5, 4, 50.0, 0.0, 0.01},
 
             {stateMachine.shootParticle, .31},
             {stateMachine.stop, -45, 1.0, 4, 43.0, 0.0, 0.01},
