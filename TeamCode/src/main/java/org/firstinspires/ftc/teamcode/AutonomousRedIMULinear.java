@@ -58,21 +58,21 @@ public class AutonomousRedIMULinear extends LinearVisionOpMode {
             {stateMachine.timeDelay, 0},
             {stateMachine.slideState, 135, 1.0, 1, 2050.0, 0.0, 0.01},
             {stateMachine.slideState, 90, .75, 3, 40.0, 0.0, 0.05},
-            {stateMachine.slideState, 180, 0.4, 6, 0.3, 0.0, 0.005},
+            {stateMachine.slideState, 180, 0.25, 6, 0.3, 0.0, 0.005},
             {stateMachine.slideState, 0, .75, 2, -600.0, 0.0, 0.01},
             {stateMachine.getColor},
             {stateMachine.slideState, 120, 0.75, 6, 0.35, 0.0, 0.005},
-            {stateMachine.slideState, 90, .75, 3, 13.0, 0.0, 0.01},
+            {stateMachine.slideState, 90, .75, 3, 11.0, 0.0, 0.01},
             {stateMachine.slideState, 0, 0.25, 6, 0.3, 0.0, 0.005},
             {stateMachine.pushBeacon, 1.0},
             {stateMachine.shootParticle, .325},
             {stateMachine.slideState, -135, 1.0, 4, 43.0, 0.0, 0.01},
             {stateMachine.slideState, 90, .75, 3, 45.0, 0.0, 0.05},
-            {stateMachine.slideState, 180, 0.4, 6, 0.3, 0.0, 0.005},
+            {stateMachine.slideState, 180, 0.25, 6, 0.3, 0.0, 0.005},
             {stateMachine.slideState, 0, .75, 2, -600.0, 0.0, 0.01},
             {stateMachine.getColor},
             {stateMachine.slideState, 120, 0.75, 6, 0.35, 0.0, 0.005},
-            {stateMachine.slideState, 90, .75, 3, 13.0, 0.0, 0.05},
+            {stateMachine.slideState, 90, .75, 3, 14.0, 0.0, 0.05},
             {stateMachine.slideState, 0, 0.25, 6, 0.3, 0.0, 0.005},
             {stateMachine.pushBeacon, 1.0},
             {stateMachine.stop},
@@ -285,7 +285,7 @@ public class AutonomousRedIMULinear extends LinearVisionOpMode {
 
                 case getColor:
                     rightOrLeft = beacon.getAnalysis().getColorString();
-                    if(rightOrLeft.equals("???, ???")||beacon.getAnalysis().getConfidence()<.05){
+                    if(rightOrLeft.equals("???, ???")||beacon.getAnalysis().getConfidence()<.20){
                         rightOrLeft = beacon.getAnalysis().getColorString();
                         telemetry.addData("color", rightOrLeft);
                         telemetry.addData("Confidence", beacon.getAnalysis().getConfidence());
@@ -444,9 +444,6 @@ public class AutonomousRedIMULinear extends LinearVisionOpMode {
     public void stop(){
         super.stop();
         endGyro = -imu.getAngularOrientation().firstAngle + 180;
-        if(endGyro>=360){
-            endGyro -= 180;
-        }
     }
 
 }

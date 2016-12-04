@@ -12,6 +12,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
 import org.lasarobotics.vision.android.Cameras;
 import org.lasarobotics.vision.ftc.resq.Beacon;
@@ -27,8 +30,8 @@ import java.util.Locale;
 /**
  * Created by Ishaan Oberoi on 12/1/2016.
  */
-@Autonomous(group = "auto", name = "Auto Blue Beacon Change")
-public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
+@Autonomous(group = "auto", name = "Auto Red Beacon Change")
+public class AutonomousRedIMULinearBeaconChange extends LinearVisionOpMode {
     DcMotor lf, lb, rf, rb, shooter, sweeper;
     // The IMU sensor object
     BNO055IMU imu;
@@ -39,7 +42,7 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
     ElapsedTime timer;
     //states in sequencer
     enum stateMachine {
-        slideState, timeDelay, testTelemetry, grip, pivotCapBall, getColor, goToBeacon2Line, transition, retractServos, start, shootParticle, estop, slide45Distance, slide90Ultrasonic, slide0light, waitBeforeGoingBack, slide180Light, pivotTo0Time, slideToBeacon, pushBeacon, checkColor, waitForBeaconPusher, retractBeaconPusher, slideNeg45ToBeacon2, slide30in, testGetToPosition, slide45Cap, pivotToNeg45, slide20US, capBall, retractBeacon, stop
+        slideState, retractBeacon, timeDelay, testTelemetry, grip, pivotCapBall, getColor, goToBeacon2Line, transition, retractServos, start, shootParticle, estop, slide45Distance, slide90Ultrasonic, slide0light, waitBeforeGoingBack, slide180Light, pivotTo0Time, slideToBeacon, pushBeacon, checkColor, waitForBeaconPusher, retractBeaconPusher, slideNeg45ToBeacon2, slide30in, testGetToPosition, slide45Cap, pivotToNeg45, slide20US, capBall, stop
     };
     stateMachine state;
     //dataloger
@@ -53,31 +56,32 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
     Object[][] sequenceArray = new Object[][]{
             {stateMachine.start},
             {stateMachine.timeDelay, 0},
-            {stateMachine.slideState, 45, 1.0, 2, -4100.0, 0.0, 0.01},
-            {stateMachine.slideState, 90, .75, 3, 45.0, 0.0, 0.05},
-            {stateMachine.slideState, 0, 0.4, 6, 0.3, 0.0, 0.005},
-            {stateMachine.slideState, 0, .75, 2, -290.0, 0.0, 0.01},
+            {stateMachine.slideState, 135, 1.0, 1, 2050.0, 0.0, 0.01},
+            {stateMachine.slideState, 90, .75, 3, 40.0, 0.0, 0.05},
+            {stateMachine.slideState, 180, 0.25, 6, 0.3, 0.0, 0.002},
+            {stateMachine.slideState, 0, .75, 2, -600.0, 0.0, 0.01},
             {stateMachine.getColor},
             {stateMachine.slideState, 120, 0.75, 6, 0.35, 0.0, 0.005},
             {stateMachine.pushBeacon},
             {stateMachine.timeDelay, .1},
             {stateMachine.slideState, 0, 0.25, 6, 0.3, 0.0, 0.005},
-            {stateMachine.slideState, 90, .75, 3, 13.0, 0.0, 0.01},
+            {stateMachine.slideState, 90, .75, 3, 14.0, 0.0, 0.01},
             {stateMachine.retractBeacon},
             {stateMachine.timeDelay, .5},
             {stateMachine.shootParticle, .325},
-            {stateMachine.slideState, -45, 1.0, 4, 43.0, 0.0, 0.01},
+            {stateMachine.slideState, -135, 1.0, 4, 43.0, 0.0, 0.01},
             {stateMachine.slideState, 90, .75, 3, 45.0, 0.0, 0.05},
-            {stateMachine.slideState, 0, 0.4, 6, 0.3, 0.0, 0.005},
-            {stateMachine.slideState, 0, .75, 2, -290.0, 0.0, 0.01},
+            {stateMachine.slideState, 180, 0.25, 6, 0.3, 0.0, 0.005},
+            {stateMachine.slideState, 0, .75, 2, -600.0, 0.0, 0.01},
             {stateMachine.getColor},
             {stateMachine.slideState, 120, 0.75, 6, 0.35, 0.0, 0.005},
             {stateMachine.pushBeacon},
             {stateMachine.timeDelay, .1},
             {stateMachine.slideState, 0, 0.25, 6, 0.3, 0.0, 0.005},
-            {stateMachine.slideState, 90, .75, 3, 13.0, 0.0, 0.05},
+            {stateMachine.slideState, 90, .75, 3, 14.0, 0.0, 0.05},
             {stateMachine.retractBeacon},
             {stateMachine.timeDelay, .5},
+            {stateMachine.pushBeacon, 1.0},
             {stateMachine.stop},
 
     };
@@ -303,9 +307,9 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
                 case pushBeacon:
 
                     telemetry.addData("color", rightOrLeft);
-                    if (rightOrLeft.equals("red, blue")) {
+                    if (rightOrLeft.equals("blue, red")) {
                         leftBeacon.setPosition(1);
-                    } else if(rightOrLeft.equals("blue, red")) {
+                    } else if(rightOrLeft.equals("red, blue")) {
                         rightBeacon.setPosition(0);
                     }
                     seqCounter++;
@@ -319,6 +323,7 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
                     timer.reset();
                     seqCounter++;
                     break;
+
                 case testTelemetry:
                     if(timer.seconds()<5){
                         telemetry.addData("state 13", "");
@@ -336,7 +341,11 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
                             double encoderAverage = average4Motors(rf.getCurrentPosition(), rb.getCurrentPosition(), lf.getCurrentPosition(), lb.getCurrentPosition());
                             if(drive.slideAngleIMU((int) sequenceArray[seqCounter][1], (double) sequenceArray[seqCounter][2], encoderAverage < (double)sequenceArray[seqCounter][4], (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]) == 1){
                                 telemetry.addData("state", encoderAverage);
-
+                                data.addField(rf.getCurrentPosition());
+                                data.addField(rb.getCurrentPosition());
+                                data.addField(lf.getCurrentPosition());
+                                data.addField(lb.getCurrentPosition());
+                                data.newLine();
                             }
                             else{
                                 timer.reset();
@@ -350,11 +359,6 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
                             if(drive.slideAngleIMU(((Integer) sequenceArray[seqCounter][1]).doubleValue(), (double) sequenceArray[seqCounter][2], backEncoder > (double)sequenceArray[seqCounter][4], (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]) == 1){
                                 telemetry.addData("state", "slide encoder ");
                                 telemetry.addData("Encoder average", backEncoder);
-                                data.addField(rf.getCurrentPosition());
-                                data.addField(rb.getCurrentPosition());
-                                data.addField(lf.getCurrentPosition());
-                                data.addField(lb.getCurrentPosition());
-                                data.newLine();
                             }
                             else{
                                 timer.reset();
@@ -399,6 +403,8 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
                             if(drive.slideAngleIMU(((Integer) sequenceArray[seqCounter][1]).doubleValue(), (double) sequenceArray[seqCounter][2], light.getLightDetected() < (double)sequenceArray[seqCounter][4], (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]) == 1){
                                 telemetry.addData("state", "light");
                                 telemetry.addData("light value", light.getLightDetected());
+                                data.addField(Math.round(light.getLightDetected()*1000));
+                                data.newLine();
                             }
                             else{
                                 timer.reset();
@@ -411,6 +417,8 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
                     drive.setPowerAll(0, 0, 0, 0);
                     telemetry.addData("state", "stop");
                     telemetry.addData("color", rightOrLeft);
+                    Orientation o = imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
+                    endGyro = formatAngle(o.angleUnit, o.firstAngle);
                     break;
                 case shootParticle:
                     if(timer.seconds()<2){
@@ -438,7 +446,7 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
     @Override
     public void stop(){
         super.stop();
-        endGyro = -imu.getAngularOrientation().firstAngle;
+        endGyro = -imu.getAngularOrientation().firstAngle + 180;
     }
 
 }

@@ -73,7 +73,7 @@ public class AutonomousBlueIMULinear extends LinearVisionOpMode {
             {stateMachine.shootParticle, .325},
             {stateMachine.slideState, -45, 1.0, 4, 43.0, 0.0, 0.01},
             {stateMachine.slideState, 90, .75, 3, 45.0, 0.0, 0.05},
-            {stateMachine.slideState, 0, 0.4, 6, 0.3, 0.0, 0.005},
+            {stateMachine.slideState, 0, 0.25, 6, 0.3, 0.0, 0.005},
             {stateMachine.slideState, 0, .75, 2, -290.0, 0.0, 0.01},
             {stateMachine.getColor},
             {stateMachine.slideState, 120, 0.75, 6, 0.35, 0.0, 0.005},
@@ -290,7 +290,7 @@ public class AutonomousBlueIMULinear extends LinearVisionOpMode {
 
                 case getColor:
                     rightOrLeft = beacon.getAnalysis().getColorString();
-                    if(rightOrLeft.equals("???, ???")||beacon.getAnalysis().getConfidence()<.05){
+                    if(rightOrLeft.equals("???, ???")||beacon.getAnalysis().getConfidence()<.25){
                         rightOrLeft = beacon.getAnalysis().getColorString();
                         telemetry.addData("color", rightOrLeft);
                         telemetry.addData("Confidence", beacon.getAnalysis().getConfidence());

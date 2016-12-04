@@ -54,7 +54,8 @@ public class BlueParticles extends LinearVisionOpMode {
     public static double endGyro;
     Object[][] sequenceArray = new Object[][]{
             {stateMachine.start},
-            {stateMachine.timeDelay, 0},
+            {stateMachine.timeDelay, 10},
+            {stateMachine.slideState, 0, .75, 2, -290.0, 0.0, 0.01},
             {stateMachine.shootParticle, .325},
             {stateMachine.stop},
 
@@ -394,7 +395,7 @@ public class BlueParticles extends LinearVisionOpMode {
                     break;
                 case shootParticle:
                     if(timer.seconds()<2){
-                        shooter.setPower((double) sequenceArray[seqCounter][1]);
+                        shooter.setPower(.31);
                     }else if(timer.seconds()<2.2){
                         shooterGate.setPosition(0);
                         shooter.setPower((double) sequenceArray[seqCounter][1]);
