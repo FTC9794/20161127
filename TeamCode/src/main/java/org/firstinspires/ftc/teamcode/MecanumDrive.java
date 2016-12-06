@@ -159,15 +159,40 @@ public class MecanumDrive {
         }
     }
 
-    public int pivotToAngleIMU(double angle, double gain, double time, double maxSpeed, double minSpeed) {
+    public int pivotToAngleIMU(double desiredAngle, double gain, boolean endCase, double maxSpeed, double minSpeed) {
         //set speeds until time is up
-        if (pivotTime.time() < time) {
+        if (endCase) {
             //measure the gyro sensor
             //get gyro sensor value
             Orientation o = imu.getAngularOrientation();
-            double ox = o.firstAngle;
-            currentAngle = ox;
+            double currentAngle = -o.firstAngle;
+            double difference = desiredAngle - currentAngle;
+            if(difference>180){
+                difference-=360;
+            }else if(difference<-180){
+                difference+=360;
+            }
 
+            double magSpeed = Math.abs(difference * gain);
+            telemetry.addData("Mag speed", magSpeed);
+            if(magSpeed > maxSpeed){
+                magSpeed = maxSpeed;
+            }
+            if(magSpeed<minSpeed){
+                magSpeed = minSpeed;
+            }
+            if(difference<0){
+                rf.setPower(magSpeed);
+                rb.setPower(magSpeed);
+                lf.setPower(-magSpeed);
+                lb.setPower(-magSpeed);
+            }else{
+                rf.setPower(-magSpeed);
+                rb.setPower(-magSpeed);
+                lf.setPower(magSpeed);
+                lb.setPower(magSpeed);
+            }
+/*
             //determine the new speed
             angleDifference = currentAngle - angle;
             newSpeed = -angleDifference * gain;
@@ -183,14 +208,13 @@ public class MecanumDrive {
             } else if (newSpeed > -minSpeed && newSpeed < 0) {
                 newSpeed = -minSpeed;
             }
-
+*/
             //send back data about what the robot is doing
-            rf.setPower(newSpeed);
-            rb.setPower(newSpeed);
-            lf.setPower(-newSpeed);
-            lf.setPower(-newSpeed);
 
-            telemetry.addData("angle diff", angleDifference);
+
+            telemetry.addData("Angle", currentAngle);
+            telemetry.addData("Desired Angle", desiredAngle);
+            telemetry.addData("angle difference", currentAngle-desiredAngle);
             return 1;
         } else {
             return 0;

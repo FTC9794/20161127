@@ -33,10 +33,10 @@ public class LinearTeleOp3 extends LinearOpMode{
     Servo rightBeacon;
     Servo shooterGate;
     MecanumDrive drive;
-    ElapsedTime beaconTimer;
     ElapsedTime shooterTime;
     ElapsedTime shooterToggleTimer;
     ElapsedTime harvestToggleTimer;
+    ElapsedTime pivotTime;
     double speed;
     double angle;
     double IMUAngle;
@@ -47,6 +47,8 @@ public class LinearTeleOp3 extends LinearOpMode{
     boolean harvestToggle;
     double offset;
     double shootingSpeed = .325;
+    enum StateMachine{right, left, front, back, gamepad};
+    StateMachine state;
     @Override
     public void runOpMode() throws InterruptedException {
         rf = hardwareMap.dcMotor.get("right_front");
@@ -58,13 +60,14 @@ public class LinearTeleOp3 extends LinearOpMode{
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         shooter.setMaxSpeed(6000);
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-
+        state = StateMachine.gamepad;
         lf.setDirection(DcMotorSimple.Direction.REVERSE);
         lb.setDirection(DcMotorSimple.Direction.REVERSE);
         sweeper.setDirection(DcMotorSimple.Direction.REVERSE);
         telemetry.addData("init", "hardware done");
         telemetry.update();
-        drive = new MecanumDrive(rf, rb, lf, lb, imu, null, null, null, telemetry, null);
+        pivotTime = new ElapsedTime();
+
         telemetry.addData("init", "Drivetrain init");
         telemetry.update();
         leftBeacon = hardwareMap.servo.get("left_beacon");
@@ -118,34 +121,70 @@ public class LinearTeleOp3 extends LinearOpMode{
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
         offset = AutonomousBlueIMULinear.endGyro;
+        drive = new MecanumDrive(rf, rb, lf, lb, imu, null, null, null, telemetry, pivotTime);
         telemetry.addData("init", "done");
         telemetry.update();
         waitForStart();
 
         while(opModeIsActive()){
-            angle = drive.joystickToAngle(gamepad1.left_stick_x, -gamepad1.left_stick_y);
-            speed = drive.returnRadius(gamepad1.left_stick_x, -gamepad1.left_stick_y);
-            q = imu.getAngularOrientation();
-            IMUAngle = q.firstAngle;
-            angle += IMUAngle + offset;
-            pivotSpeed = -gamepad1.right_stick_x;
-            telemetry.addData("offset", offset);
-            telemetry.addData("Angle: ", angle);
-            telemetry.addData("Speed: ", speed);
-            telemetry.addData("pivot speed: ", pivotSpeed);
-            telemetry.addData("gamepad1 left x", gamepad1.left_stick_x);
-            telemetry.addData("gamepad1 left y", gamepad1.left_stick_y);
+            /*
+            switch(state){
+                case gamepad:
+                    if(gamepad1.dpad_right){
+                        state = StateMachine.right;
+                    }else if(gamepad1.dpad_left) {
+                        state = StateMachine.left;
+                    }else if(gamepad1.dpad_up) {
+                        state = StateMachine.front;
+                    }else if(gamepad1.dpad_down) {
+                        state = StateMachine.back;
+                    }else{
+                        angle = drive.joystickToAngle(gamepad1.right_stick_x, -gamepad1.right_stick_y);
+                        speed = drive.returnRadius(gamepad1.right_stick_x, -gamepad1.right_stick_y);
+                        q = imu.getAngularOrientation();
+                        IMUAngle = q.firstAngle;
+                        angle += IMUAngle + offset;
+                        pivotSpeed = -gamepad1.left_stick_x;
+                        telemetry.addData("offset", offset);
+                        telemetry.addData("Angle: ", angle);
+                        telemetry.addData("Speed: ", speed);
+                        telemetry.addData("pivot speed: ", pivotSpeed);
+                        telemetry.addData("gamepad1 left x", gamepad1.right_stick_x);
+                        telemetry.addData("gamepad1 left y", gamepad1.right_stick_y);
 
-            if(gamepad1.left_trigger>.1){
-                speed*=.5;
-            }
-            drive.pivotSlide(angle, speed, true, pivotSpeed);
-            if(gamepad1.b){
-                rightBeacon.setPosition(0);
-                leftBeacon.setPosition(1);
+                        if(gamepad1.left_trigger>.1){
+                            speed*=.5;
+                        }
+                        drive.pivotSlide(angle, speed, true, pivotSpeed);
+
+                }
+            }*/
+            if(gamepad1.dpad_up){
+                drive.pivotToAngleIMU(90+offset, .005, true, .5, .1);
+            }else if(gamepad1.dpad_down){
+                drive.pivotToAngleIMU(270+offset, .005, true, .5, .1);
+            }else if(gamepad1.dpad_left){
+                drive.pivotToAngleIMU(0+offset, .005, true, .5, .1);
+            }else if(gamepad1.dpad_right){
+                drive.pivotToAngleIMU(180+offset, .005, true, .5, .1);
             }else{
-                rightBeacon.setPosition(1);
-                leftBeacon.setPosition(0);
+                angle = drive.joystickToAngle(gamepad1.right_stick_x, -gamepad1.right_stick_y);
+                speed = drive.returnRadius(gamepad1.right_stick_x, -gamepad1.right_stick_y);
+                q = imu.getAngularOrientation();
+                IMUAngle = q.firstAngle;
+                angle += IMUAngle + offset;
+                pivotSpeed = -gamepad1.left_stick_x;
+                telemetry.addData("offset", offset);
+                telemetry.addData("Angle: ", angle);
+                telemetry.addData("Speed: ", speed);
+                telemetry.addData("pivot speed: ", pivotSpeed);
+                telemetry.addData("gamepad1 left x", gamepad1.right_stick_x);
+                telemetry.addData("gamepad1 left y", gamepad1.right_stick_y);
+
+                if(gamepad1.left_trigger>.1){
+                    speed*=.5;
+                }
+                drive.pivotSlide(angle, speed, true, pivotSpeed);
             }
 
             if(shooterToggleTimer.seconds()>1){
