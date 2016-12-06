@@ -39,7 +39,7 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
     ElapsedTime timer;
     //states in sequencer
     enum stateMachine {
-        slideState, timeDelay, testTelemetry, grip, pivotCapBall, getColor, goToBeacon2Line, transition, retractServos, start, shootParticle, estop, slide45Distance, slide90Ultrasonic, slide0light, waitBeforeGoingBack, slide180Light, pivotTo0Time, slideToBeacon, pushBeacon, checkColor, waitForBeaconPusher, retractBeaconPusher, slideNeg45ToBeacon2, slide30in, testGetToPosition, slide45Cap, pivotToNeg45, slide20US, capBall, retractBeacon, stop
+        slideState, timeDelay, startShooter, testTelemetry, grip, pivotCapBall, getColor, goToBeacon2Line, transition, retractServos, start, shootParticle, estop, slide45Distance, slide90Ultrasonic, slide0light, waitBeforeGoingBack, slide180Light, pivotTo0Time, slideToBeacon, pushBeacon, checkColor, waitForBeaconPusher, retractBeaconPusher, slideNeg45ToBeacon2, slide30in, testGetToPosition, slide45Cap, pivotToNeg45, slide20US, capBall, retractBeacon, stop
     };
     stateMachine state;
     //dataloger
@@ -54,19 +54,21 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
             {stateMachine.start},
             {stateMachine.timeDelay, 0},
             {stateMachine.slideState, 45, 1.0, 2, -4100.0, 0.0, 0.01},
-            {stateMachine.slideState, 90, .75, 3, 45.0, 0.0, 0.05},
-            {stateMachine.slideState, 0, 0.4, 6, 0.3, 0.0, 0.005},
-            {stateMachine.slideState, 0, .75, 2, -290.0, 0.0, 0.01},
-            {stateMachine.getColor},
-            {stateMachine.slideState, 120, 0.75, 6, 0.35, 0.0, 0.005},
-            {stateMachine.pushBeacon},
-            {stateMachine.timeDelay, .1},
+            {stateMachine.slideState, 90, .75, 3, 40.0, 0.0, 0.05},
+            {stateMachine.slideState, 0, 0.5, 2, -955.0, 0.0, 0.05},
             {stateMachine.slideState, 0, 0.25, 6, 0.3, 0.0, 0.005},
-            {stateMachine.slideState, 90, .75, 3, 13.0, 0.0, 0.01},
+            {stateMachine.slideState, 0, .5, 2, -290.0, 0.0, 0.01},
+            {stateMachine.getColor},
+            {stateMachine.slideState, 120, 0.5, 6, 0.35, 0.0, 0.005},
+            {stateMachine.pushBeacon},
+            {stateMachine.slideState, 0, 0.35, 6, 0.3, 0.0, 0.05},
+            {stateMachine.slideState, 90, .75, 3, 10.0, 0.0, 0.01},
             {stateMachine.retractBeacon},
-            {stateMachine.timeDelay, .5},
-            {stateMachine.shootParticle, .325},
-            {stateMachine.slideState, -45, 1.0, 4, 43.0, 0.0, 0.01},
+            {stateMachine.startShooter, 0.31},
+            {stateMachine.slideState, -90, 0.5, 4, 50.0, 0.0, 0.01},
+
+            {stateMachine.shootParticle, .31},
+            {stateMachine.stop, -45, 1.0, 4, 43.0, 0.0, 0.01},
             {stateMachine.slideState, 90, .75, 3, 45.0, 0.0, 0.05},
             {stateMachine.slideState, 0, 0.4, 6, 0.3, 0.0, 0.005},
             {stateMachine.slideState, 0, .75, 2, -290.0, 0.0, 0.01},
@@ -410,8 +412,15 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
                 case stop:
                     drive.setPowerAll(0, 0, 0, 0);
                     telemetry.addData("state", "stop");
+                    telemetry.addData("US level", ultrasonic.cmUltrasonic());
                     telemetry.addData("color", rightOrLeft);
                     break;
+
+                case startShooter:
+                    shooter.setPower((double) sequenceArray[seqCounter][1]);
+                    seqCounter++;
+                    break;
+
                 case shootParticle:
                     if(timer.seconds()<2){
                         shooter.setPower((double) sequenceArray[seqCounter][1]);
