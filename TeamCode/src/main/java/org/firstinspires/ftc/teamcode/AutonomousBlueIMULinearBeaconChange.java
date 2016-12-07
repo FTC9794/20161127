@@ -39,7 +39,7 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
     ElapsedTime timer;
     //states in sequencer
     enum stateMachine {
-        slideState, timeDelay, startShooter, testTelemetry, grip, pivotCapBall, getColor, goToBeacon2Line, transition, retractServos, start, shootParticle, estop, slide45Distance, slide90Ultrasonic, slide0light, waitBeforeGoingBack, slide180Light, pivotTo0Time, slideToBeacon, pushBeacon, checkColor, waitForBeaconPusher, retractBeaconPusher, slideNeg45ToBeacon2, slide30in, testGetToPosition, slide45Cap, pivotToNeg45, slide20US, capBall, retractBeacon, stop
+        slideState, timeDelay, startShooter, pivot, testTelemetry, grip, pivotCapBall, getColor, goToBeacon2Line, transition, retractServos, start, shootParticle, estop, slide45Distance, slide90Ultrasonic, slide0light, waitBeforeGoingBack, slide180Light, pivotTo0Time, slideToBeacon, pushBeacon, checkColor, waitForBeaconPusher, retractBeaconPusher, slideNeg45ToBeacon2, slide30in, testGetToPosition, slide45Cap, pivotToNeg45, slide20US, capBall, retractBeacon, stop
     };
     stateMachine state;
     //dataloger
@@ -66,8 +66,23 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
             {stateMachine.retractBeacon},
             {stateMachine.startShooter, 0.31},
             {stateMachine.slideState, -90, 0.5, 4, 50.0, 0.0, 0.01},
-
             {stateMachine.shootParticle, .31},
+            {stateMachine.slideState, 90, .5, 3, 40.0, 0.0, 0.05},
+            {stateMachine.slideState, 0, 0.5, 2, -2784.96, 0.0, 0.05},
+            {stateMachine.slideState, 0, 0.25, 6, 0.3, 0.0, 0.005},
+            {stateMachine.slideState, 0, .5, 2, -290.0, 0.0, 0.01},
+            {stateMachine.getColor},
+            {stateMachine.slideState, 120, 0.5, 6, 0.35, 0.0, 0.005},
+            {stateMachine.pushBeacon},
+            {stateMachine.slideState, 0, 0.35, 6, 0.3, 0.0, 0.05},
+            {stateMachine.slideState, 90, .75, 3, 10.0, 0.0, 0.01},
+            {stateMachine.retractBeacon},
+
+            {stateMachine.slideState, -90, 0.5, 4, 35.0, 0.0, 0.01},
+
+            {stateMachine.slideState, -135, 1.0, 2, -2387.11, 0.0, 0.01},
+            {stateMachine.stop},
+/*
             {stateMachine.stop, -45, 1.0, 4, 43.0, 0.0, 0.01},
             {stateMachine.slideState, 90, .75, 3, 45.0, 0.0, 0.05},
             {stateMachine.slideState, 0, 0.4, 6, 0.3, 0.0, 0.005},
@@ -81,7 +96,7 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
             {stateMachine.retractBeacon},
             {stateMachine.timeDelay, .5},
             {stateMachine.stop},
-
+*/
     };
     String formatDegrees(double degrees){
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
@@ -294,6 +309,19 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
                         rightOrLeft = beacon.getAnalysis().getColorString();
                         telemetry.addData("color", rightOrLeft);
                         telemetry.addData("Confidence", beacon.getAnalysis().getConfidence());
+
+                        if(timer.seconds() > 1 && beaconPresssed == 0){
+                            telemetry.addData("skip color", "");
+                            seqCounter += 7;
+                            beaconPresssed = 1;
+                            break;
+                        }
+                        else if(timer.seconds() > 1 && beaconPresssed == 1){
+                            telemetry.addData("skip color", "");
+                            seqCounter += 4;
+                            break;
+                        }
+
                     }
                     else{
                         timer.reset();
@@ -327,6 +355,16 @@ public class AutonomousBlueIMULinearBeaconChange extends LinearVisionOpMode {
                     }
                     else{
                         seqCounter++;
+                        timer.reset();
+                    }
+                    break;
+
+                case pivotCapBall:
+                    if(drive.pivotToAngleIMU(45, 0.05, timer.seconds() < 0.75, 0.3, -0.3) == 1){
+                        telemetry.addData("state", "pivot cap");
+                    }
+                    else{
+                        seqCounter ++;
                         timer.reset();
                     }
                     break;
