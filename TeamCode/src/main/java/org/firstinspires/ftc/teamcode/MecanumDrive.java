@@ -160,55 +160,47 @@ public class MecanumDrive {
     }
 
     public int pivotToAngleIMU(double desiredAngle, double gain, boolean endCase, double maxSpeed, double minSpeed) {
-        //set speeds until time is up
         if (endCase) {
             //measure the gyro sensor
             //get gyro sensor value
             Orientation o = imu.getAngularOrientation();
             double currentAngle = -o.firstAngle;
             double difference = desiredAngle - currentAngle;
-            if(difference>180){
-                difference-=360;
-            }else if(difference<-180){
-                difference+=360;
-            }
+            double magSpeed = 0;
 
-            double magSpeed = Math.abs(difference * gain);
-            telemetry.addData("Mag speed", magSpeed);
+            double turnDirection = 1; // 1 is clockwise; -1 is counterclockwise
+
+            if (difference >0) {
+                // Desired angle is greater than current, turn clockwise
+                turnDirection = 1;
+
+            // if you need to turn more than 180 degrees, turn the opposite way
+            // set the magnitude of the speed to be proportional to the difference
+            // if you are more than 180 degrees away, you need to subtract the difference from 360
+            if (Math.abs(difference)>180){
+                turnDirection = -turnDirection;
+                // magintude of the speed is proportional to the difference and the gain
+                magSpeed = (360-(Math.abs(difference)) * gain) ;
+            } else
+                magSpeed = Math.abs(difference)*gain ;
+
+
+            // never go above the max speed or below min speed
+
             if(magSpeed > maxSpeed){
                 magSpeed = maxSpeed;
             }
             if(magSpeed<minSpeed){
                 magSpeed = minSpeed;
             }
-            if(difference<0){
-                rf.setPower(magSpeed);
-                rb.setPower(magSpeed);
-                lf.setPower(-magSpeed);
-                lb.setPower(-magSpeed);
-            }else{
-                rf.setPower(-magSpeed);
-                rb.setPower(-magSpeed);
-                lf.setPower(magSpeed);
-                lb.setPower(magSpeed);
-            }
-/*
-            //determine the new speed
-            angleDifference = currentAngle - angle;
-            newSpeed = -angleDifference * gain;
+            telemetry.addData("Mag speed", magSpeed);
 
-            //set limits
-            if (newSpeed > maxSpeed) {
-                newSpeed = maxSpeed;
-            } else if (newSpeed < -maxSpeed) {
-                newSpeed = -maxSpeed;
+            rf.setPower(magSpeed*turnDirection);
+            rb.setPower(magSpeed*turnDirection);
+            lf.setPower(-magSpeed*turnDirection);
+            lb.setPower(-magSpeed*turnDirection);
             }
-            if (newSpeed < minSpeed && newSpeed > 0) {
-                newSpeed = minSpeed;
-            } else if (newSpeed > -minSpeed && newSpeed < 0) {
-                newSpeed = -minSpeed;
-            }
-*/
+
             //send back data about what the robot is doing
 
 
@@ -422,14 +414,21 @@ public class MecanumDrive {
     the oGain which is a double between 0 and 1 which is how much gain for proportional feedback to correct for orientation
      */
     public int slideAngle(double slideDirection, double speed, boolean condition, double orientation, double oGain) {
-        //return the new X and Y values using the angle needed and the speed the robot was
-        //traveling at
+        // get the horizonal and vertical components of the robot speeds
+        // the horizonal and vertical are used to set the power of the motor
 
         horizontal = round2D(calculateX(slideDirection, speed));
         vertical = round2D(calculateY(slideDirection, speed));
+
+        // Get the gyro angle (WHAT ARE THE VALID RANGES?)
         int gyroAngle = gyro.getIntegratedZValue();
+
+        // Correct for the orientation of the robot relative to the desired direction
+        // orientation is the desired angle want to slide
+        // correction is the error times the gain.
+
         double pivotCorrection = -((orientation - gyroAngle) * oGain);
-        //determine the powers using the new X and Y values and the other joystick to pivot
+
         if (condition) {
             rf.setPower(((vertical - horizontal) - pivotCorrection) * .5);
             rb.setPower(((vertical + horizontal) - pivotCorrection) * .5);
@@ -448,16 +447,17 @@ public class MecanumDrive {
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
     public int slideAngleIMU(double slideDirection, double speed, boolean condition, double orientation, double oGain) {
-        //return the new X and Y values using the angle needed and the speed the robot was
-        //traveling at
 
-
+        // get the horizonal and vertical components of the robot speeds
+        // the horizonal and vertical are used to set the power of the motor
         horizontal = round2D(calculateX(slideDirection, speed));
         vertical = round2D(calculateY(slideDirection, speed));
+
         Orientation o = imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
         double ox = formatAngle(o.angleUnit, o.firstAngle);
         double gyroAngle = ox;
 
+        // What is the range of the gyroAngle?
         double pivotCorrection = -((orientation - gyroAngle) * oGain);
         //determine the powers using the new X and Y values and the other joystick to pivot
         if (condition) {
@@ -486,12 +486,12 @@ public class MecanumDrive {
         return Math.atan2(x, y) * (180 / Math.PI);
     }
 
-    //returns X joystick value using angle and speed
+    //returns X vector value using angle and speed
     public double calculateX(double desiredAngle, double speed) {
         return Math.sin(Math.toRadians(desiredAngle)) * speed;
     }
 
-    //returns the Y joystick value using angle and speed
+    //returns the Y vector value using angle and speed
     public double calculateY(double desiredAngle, double speed) {
         return Math.cos(Math.toRadians(desiredAngle)) * speed;
     }
