@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.OldCode;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
@@ -9,11 +9,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.ReadWriteFile;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
-import org.lasarobotics.vision.opmode.LinearVisionOpMode;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.OldCode.BlueParticles;
 
 import java.io.File;
 
@@ -21,8 +21,8 @@ import java.io.File;
  * Created by Ishaan Oberoi on 12/1/2016.
  */
 
-@TeleOp(group = "Mecanum Drive", name = "TeleOp Blue")
-public class LinearTeleOp3 extends LinearOpMode{
+@TeleOp(group = "Mecanum Drive", name = "TeleOp Shoot Ball")
+public class LinearTeleOp3ShootBalls extends LinearOpMode{
     DcMotor rf;
     DcMotor rb;
     DcMotor lf;
@@ -33,10 +33,10 @@ public class LinearTeleOp3 extends LinearOpMode{
     Servo rightBeacon;
     Servo shooterGate;
     MecanumDrive drive;
+    ElapsedTime beaconTimer;
     ElapsedTime shooterTime;
     ElapsedTime shooterToggleTimer;
     ElapsedTime harvestToggleTimer;
-    ElapsedTime pivotTime;
     double speed;
     double angle;
     double IMUAngle;
@@ -58,13 +58,13 @@ public class LinearTeleOp3 extends LinearOpMode{
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         shooter.setMaxSpeed(6000);
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
         lf.setDirection(DcMotorSimple.Direction.REVERSE);
         lb.setDirection(DcMotorSimple.Direction.REVERSE);
         sweeper.setDirection(DcMotorSimple.Direction.REVERSE);
         telemetry.addData("init", "hardware done");
         telemetry.update();
-        pivotTime = new ElapsedTime();
-
+        drive = new MecanumDrive(rf, rb, lf, lb, imu, null, null, null, telemetry, null);
         telemetry.addData("init", "Drivetrain init");
         telemetry.update();
         leftBeacon = hardwareMap.servo.get("left_beacon");
@@ -117,39 +117,35 @@ public class LinearTeleOp3 extends LinearOpMode{
         // and named "imu".
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
-        offset = AutonomousBlueIMULinear.endGyro;
-        drive = new MecanumDrive(rf, rb, lf, lb, imu, null, null, null, telemetry, pivotTime);
+        offset = BlueParticles.endGyro;
         telemetry.addData("init", "done");
         telemetry.update();
         waitForStart();
 
         while(opModeIsActive()){
-            if(gamepad1.dpad_up){
-                drive.pivotToAngleIMU(90+offset, .005, true, .5, .1);
-            }else if(gamepad1.dpad_down){
-                drive.pivotToAngleIMU(270+offset, .005, true, .5, .1);
-            }else if(gamepad1.dpad_left){
-                drive.pivotToAngleIMU(0+offset, .005, true, .5, .1);
-            }else if(gamepad1.dpad_right){
-                drive.pivotToAngleIMU(180+offset, .005, true, .5, .1);
-            }else{
-                angle = drive.joystickToAngle(gamepad1.right_stick_x, -gamepad1.right_stick_y);
-                speed = drive.returnRadius(gamepad1.right_stick_x, -gamepad1.right_stick_y);
-                q = imu.getAngularOrientation();
-                IMUAngle = q.firstAngle;
-                angle += IMUAngle + offset;
-                pivotSpeed = -gamepad1.left_stick_x;
-                telemetry.addData("offset", offset);
-                telemetry.addData("Angle: ", angle);
-                telemetry.addData("Speed: ", speed);
-                telemetry.addData("pivot speed: ", pivotSpeed);
-                telemetry.addData("gamepad1 left x", gamepad1.right_stick_x);
-                telemetry.addData("gamepad1 left y", gamepad1.right_stick_y);
+            angle = drive.joystickToAngle(gamepad1.left_stick_x, -gamepad1.left_stick_y);
+            speed = drive.returnRadius(gamepad1.left_stick_x, -gamepad1.left_stick_y);
+            q = imu.getAngularOrientation();
+            IMUAngle = q.firstAngle;
+            angle += IMUAngle + offset;
+            pivotSpeed = -gamepad1.right_stick_x;
+            telemetry.addData("offset", offset);
+            telemetry.addData("Angle: ", angle);
+            telemetry.addData("Speed: ", speed);
+            telemetry.addData("pivot speed: ", pivotSpeed);
+            telemetry.addData("gamepad1 left x", gamepad1.left_stick_x);
+            telemetry.addData("gamepad1 left y", gamepad1.left_stick_y);
 
-                if(gamepad1.left_trigger>.1){
-                    speed*=.5;
-                }
-                drive.pivotSlide(angle, speed, true, pivotSpeed);
+            if(gamepad1.left_trigger>.1){
+                speed*=.5;
+            }
+            drive.pivotSlide(angle, speed, true, pivotSpeed);
+            if(gamepad1.b){
+                rightBeacon.setPosition(0);
+                leftBeacon.setPosition(1);
+            }else{
+                rightBeacon.setPosition(1);
+                leftBeacon.setPosition(0);
             }
 
             if(shooterToggleTimer.seconds()>1){

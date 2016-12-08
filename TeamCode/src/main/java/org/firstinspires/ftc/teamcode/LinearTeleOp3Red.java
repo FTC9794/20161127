@@ -19,7 +19,7 @@ import java.io.File;
  * Created by Ishaan Oberoi on 12/1/2016.
  */
 
-@TeleOp(group = "Mecanum Drive", name = "TeleOp 3 Linear Red")
+@TeleOp(group = "Mecanum Drive", name = "TeleOp Red")
 public class LinearTeleOp3Red extends LinearOpMode{
     DcMotor rf;
     DcMotor rb;
@@ -83,7 +83,7 @@ public class LinearTeleOp3Red extends LinearOpMode{
         telemetry.update();
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.loggingEnabled = true;
-        parameters.loggingTag     = "IMU";
+        parameters.loggingTag = "IMU";
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);// Get the calibration data
         BNO055IMU.CalibrationData calibrationData = imu.readCalibrationData();
@@ -103,11 +103,11 @@ public class LinearTeleOp3Red extends LinearOpMode{
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
         // provide positional information.
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "AdafruitIMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
+        parameters.loggingEnabled = true;
+        parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
@@ -119,39 +119,41 @@ public class LinearTeleOp3Red extends LinearOpMode{
         telemetry.addData("init", "done");
         telemetry.update();
         waitForStart();
+        while (opModeIsActive()) {
+            if (gamepad1.dpad_up) {
+                drive.pivotToAngleIMU(90 + offset, .005, true, .5, .1);
+            } else if (gamepad1.dpad_down) {
+                drive.pivotToAngleIMU(270 + offset, .005, true, .5, .1);
+            } else if (gamepad1.dpad_left) {
+                drive.pivotToAngleIMU(0 + offset, .005, true, .5, .1);
+            } else if (gamepad1.dpad_right) {
+                drive.pivotToAngleIMU(180 + offset, .005, true, .5, .1);
+            } else {
+                angle = drive.joystickToAngle(gamepad1.right_stick_x, -gamepad1.right_stick_y);
+                speed = drive.returnRadius(gamepad1.right_stick_x, -gamepad1.right_stick_y);
+                q = imu.getAngularOrientation();
+                IMUAngle = q.firstAngle;
+                angle += IMUAngle + offset;
+                pivotSpeed = -gamepad1.left_stick_x;
+                telemetry.addData("offset", offset);
+                telemetry.addData("Angle: ", angle);
+                telemetry.addData("Speed: ", speed);
+                telemetry.addData("pivot speed: ", pivotSpeed);
+                telemetry.addData("gamepad1 left x", gamepad1.right_stick_x);
+                telemetry.addData("gamepad1 left y", gamepad1.right_stick_y);
 
-        while(opModeIsActive()){
-            angle = drive.joystickToAngle(gamepad1.left_stick_x, -gamepad1.left_stick_y);
-            speed = drive.returnRadius(gamepad1.left_stick_x, -gamepad1.left_stick_y);
-            q = imu.getAngularOrientation();
-            IMUAngle = q.firstAngle;
-            angle += IMUAngle + offset;
-            pivotSpeed = -gamepad1.right_stick_x;
-            telemetry.addData("offset", offset);
-            telemetry.addData("Angle: ", angle);
-            telemetry.addData("Speed: ", speed);
-            telemetry.addData("pivot speed: ", pivotSpeed);
-            telemetry.addData("gamepad1 left x", gamepad1.left_stick_x);
-            telemetry.addData("gamepad1 left y", gamepad1.left_stick_y);
-
-            if(gamepad1.left_trigger>.1){
-                speed*=.5;
+                if (gamepad1.left_trigger > .1) {
+                    speed *= .5;
+                }
+                drive.pivotSlide(angle, speed, true, pivotSpeed);
             }
-            drive.pivotSlide(angle, speed, true, pivotSpeed);
-            if(gamepad1.b){
-                rightBeacon.setPosition(0);
-                leftBeacon.setPosition(1);
-            }else{
-                rightBeacon.setPosition(1);
-                leftBeacon.setPosition(0);
-            }
 
-            if(shooterToggleTimer.seconds()>1){
-                if(gamepad2.b){
-                    if(shooterToggle){
+            if (shooterToggleTimer.seconds() > 1) {
+                if (gamepad2.b) {
+                    if (shooterToggle) {
                         shooter.setPower(0);
                         shooterToggle = false;
-                    }else{
+                    } else {
                         shooter.setPower(shootingSpeed);
                         shooterToggle = true;
                     }
@@ -160,21 +162,21 @@ public class LinearTeleOp3Red extends LinearOpMode{
 
             }
 
-            if(gamepad2.x){
+            if (gamepad2.x) {
                 shooterGate.setPosition(0);
                 shooterTime.reset();
             }
-            if(shooterTime.milliseconds()>75){
+            if (shooterTime.milliseconds() > 75) {
                 shooterGate.setPosition(.5);
             }
 
-            if(harvestToggleTimer.seconds()>.5){
-                if(gamepad2.y){
-                    if(harvestToggle){
+            if (harvestToggleTimer.seconds() > .5) {
+                if (gamepad2.y) {
+                    if (harvestToggle) {
                         sweeper.setPower(0);
                         harvestToggle = false;
 
-                    }else{
+                    } else {
                         sweeper.setPower(1);
                         harvestToggle = true;
                     }
@@ -182,7 +184,7 @@ public class LinearTeleOp3Red extends LinearOpMode{
                 }
 
             }
-            if(gamepad2.a){
+            if (gamepad2.a) {
                 sweeper.setPower(-1);
             }
 

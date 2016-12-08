@@ -1,29 +1,20 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.OldCode;
 
-import com.qualcomm.hardware.adafruit.BNO055IMU;
-import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsAnalogOpticalDistanceSensor;
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.lasarobotics.vision.android.Cameras;
-import org.lasarobotics.vision.ftc.resq.Beacon;
-import org.lasarobotics.vision.opmode.VisionOpMode;
-import org.lasarobotics.vision.opmode.extensions.CameraControlExtension;
-import org.opencv.core.Size;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 /**
  * Created by Ishaan Oberoi on 11/26/2016.
  */
-//@Autonomous(group = "auto", name = "Autonomous 2a")
-public class PushCapBallSequencer extends OpMode {
+//@Autonomous(group = "auto", name = "Autonomous 2b")
+public class PushCapBallSequencerWithUltrasonic extends OpMode {
     DcMotor lf, lb, rf, rb;
     ElapsedTime timer;
     //states in sequencer
@@ -35,6 +26,7 @@ public class PushCapBallSequencer extends OpMode {
     Servo leftBeacon;
     Servo shooterGate;
     MecanumDrive drive;
+    ModernRoboticsI2cRangeSensor ultrasonic;
     int seqCounter = 0;
     Object[][] sequenceArray = new Object[][]{
             {stateMachine.start},
@@ -61,7 +53,7 @@ public class PushCapBallSequencer extends OpMode {
         leftBeacon.setPosition(0);
         rightBeacon.setPosition(1);
         shooterGate.setPosition(.5);
-
+        ultrasonic = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "ultrasonic");
 
         //reverse the directions of the right motors
         lf.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -80,7 +72,7 @@ public class PushCapBallSequencer extends OpMode {
 
         timer = new ElapsedTime();
         state = stateMachine.start;
-        drive = new MecanumDrive(rf, rb, lf, lb, null, null, null, null, telemetry, null);
+        drive = new MecanumDrive(rf, rb, lf, lb, null, null, ultrasonic, null, telemetry, null);
     }
 
     public int average2Motors(int a, int b) {

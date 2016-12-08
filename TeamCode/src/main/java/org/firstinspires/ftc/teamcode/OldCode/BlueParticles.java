@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.OldCode;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
@@ -16,6 +16,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
+import org.firstinspires.ftc.teamcode.DataLogger;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.lasarobotics.vision.android.Cameras;
 import org.lasarobotics.vision.ftc.resq.Beacon;
 import org.lasarobotics.vision.opmode.LinearVisionOpMode;
@@ -29,7 +31,7 @@ import java.util.Locale;
 /**
  * Created by Ishaan Oberoi on 12/1/2016.
  */
-@Autonomous(group = "auto", name = "Ball Shooting Autonomous")
+//@Autonomous(group = "auto", name = "Ball Shooting Autonomous")
 public class BlueParticles extends LinearVisionOpMode {
     DcMotor lf, lb, rf, rb, shooter, sweeper;
     // The IMU sensor object
