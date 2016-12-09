@@ -32,7 +32,7 @@ import java.util.Locale;
  * Created by Jyoti on 12/7/2016.
  */
 
-@Autonomous(group = "auto", name = "Auto Blue Pankaj")
+@Autonomous(group = "auto", name = "Auto Blue Sidwell")
 public class AutoBluePankaj extends LinearVisionOpMode {
 
     // DC motors
@@ -69,7 +69,7 @@ public class AutoBluePankaj extends LinearVisionOpMode {
     // Shooter and shooter gate
     double shooterGateOpen = 0;
     double shooterGateClosed = 0.5;
-    double shooterGateOpenTime = .4;
+    double shooterGateOpenTime = 1.0;
     double shooterWheelPower = 0.31;
 
     // positions of the beacons' servo
@@ -82,12 +82,12 @@ public class AutoBluePankaj extends LinearVisionOpMode {
     double whiteLightTrigger = 0.3;
 
     // Shooting distance from wall
-    double shootingDistance = 45;
+    double shootingDistance = 50;
 
     // Speeds
 
     double highPower = .75;
-    double highGain = 0.03;
+    double highGain = 0.01;
 
     double midPower = 0.5;
     double midGain = 0.01;
@@ -96,8 +96,10 @@ public class AutoBluePankaj extends LinearVisionOpMode {
     double lowGain = 0.05;
 
     double allPower = 1;
-    double allPowerGain = 0.05;
+    double allPowerGain = 0.01;
 
+    //We want to push the beacon when our robot is 10 cm away from the wall
+    double pushBeaconDistance = 8;
 
     public static double endGyro;
 
@@ -141,23 +143,23 @@ public class AutoBluePankaj extends LinearVisionOpMode {
             // STEP 8. Get the beacon colors
             {stateMachine.getColor, 1, 1},
 
-            //stop for tes
-            {stateMachine.stop},
 
             // STEP 9. Slide back to the white line
             {stateMachine.slideState, 120, midPower, 6, whiteLightTrigger, 0.0, midGain},
 
             // pushBeacon is either 1 for extend or 0 for retract must run the getColor state before this.
             //
-            // STEP 10. Extend the beac0n pusher
+            // STEP 10. Extend the beacon pusher
             {stateMachine.pushBeacon, 1}, // 0 is retract, 1 is push
 
             // STEP 11. Slide back to white line slowly if there was overshoot
             {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
 
+
             // STEP 12. Slide to wall until 12 cm to push the beacon.
             // A new case in slideState to be able to skip if the beacon is not detected
-            {stateMachine.slideState, 90, midPower, 7, 12.0, 0.0, midGain},
+            {stateMachine.slideState, 90, highPower, 7, pushBeaconDistance, 0.0, midGain},
+
 
             // STEP 13. Start wheel shooter
             {stateMachine.shooterWheel, shooterWheelPower},
@@ -165,23 +167,24 @@ public class AutoBluePankaj extends LinearVisionOpMode {
             // STEP 14. Back off the wall to the shooting distance from the wall
             {stateMachine.slideState, -90, highPower, 4, shootingDistance, 0.0, highGain},
 
+
             // STEP 15. Retract beacon pusher
             {stateMachine.pushBeacon, 0}, // retracts beacon
 
             // STEP 16. Move forward to shooting position
-            {stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
+            //{stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
 
             // STEPS 17-20. Shoot 1st particle, wait 1 sec, Shoot 2nd particle, stop shooter
             {stateMachine.triggerGate, shooterGateOpenTime},
-            {stateMachine.timeDelay, 1}, // If you want to wait before starting, start here
-            {stateMachine.triggerGate, shooterGateOpenTime},
+            //{stateMachine.timeDelay, 2}, // If you want to wait before starting, start here
+            //{stateMachine.triggerGate, shooterGateOpenTime},
             {stateMachine.shooterWheel, 0.0},
-            {stateMachine.stop},
+
             // STEP 21 Move forward to second line at speed .75
             {stateMachine.slideState, 0, highPower, 2, -2784.96, 0.0, highGain},
 
             // STEP 22 Move sideways slowly to 40 cm from wall
-            {stateMachine.slideState, 90, midPower, 3, 40.0, 0.0, midGain},
+            {stateMachine.slideState, 90, highPower, 3, 40.0, 0.0, highGain},
 
             // STEP 23 Move slowly to line
             {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
@@ -190,7 +193,7 @@ public class AutoBluePankaj extends LinearVisionOpMode {
             {stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
 
             // STEP 25. Get the beacon colors
-            {stateMachine.getColor, 7, 1},
+            {stateMachine.getColor, 1, 1},
 
             // STEP 26. Slide back to the white line
             {stateMachine.slideState, 120, midPower, 6, whiteLightTrigger, 0.0, midGain},
@@ -202,10 +205,10 @@ public class AutoBluePankaj extends LinearVisionOpMode {
             {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
 
             // STEP 29. Slide to wall until 12 cm to push the beacon.
-            {stateMachine.slideState, 90, midPower, 7, 12.0, 0.0, midGain},
+            {stateMachine.slideState, 90, highPower, 7, pushBeaconDistance, 0.0, highGain},
 
             // STEP 30. Back off wall
-            {stateMachine.slideState, -90, midPower, 4, 35.0, 0.0, midGain},
+            {stateMachine.slideState, -90, highPower, 4, 35.0, 0.0, highGain},
 
             // STEP 31. Retract beacon pusher
             {stateMachine.pushBeacon, 0},
@@ -445,6 +448,7 @@ public class AutoBluePankaj extends LinearVisionOpMode {
                         // and haven't been able to determine colors, then skip # of states
                         // passed as argument.
                         if(timer.seconds() > 1){
+                            rightOrLeft = "???, ???";
                             telemetry.addData("skip color", "");
                             seqCounter += (int) sequenceArray[seqCounter][1];
                             noOfBeaconsPressed++;
@@ -474,6 +478,10 @@ public class AutoBluePankaj extends LinearVisionOpMode {
                         } else if(rightOrLeft.equals("blue, red")) {
                             rightBeacon.setPosition(rightBeaconExtend); // extend right beacon
                             leftBeacon.setPosition(leftBeaconRetract); // retract left beacon. for safety
+                        }
+                        else{
+                            leftBeacon.setPosition(leftBeaconRetract);
+                            rightBeacon.setPosition(rightBeaconRetract);
                         }
                     } else { // argument is not 1. retract both beacons.
                         leftBeacon.setPosition(leftBeaconRetract);
