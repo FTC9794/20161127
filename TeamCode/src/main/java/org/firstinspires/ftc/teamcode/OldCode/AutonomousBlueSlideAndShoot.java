@@ -5,6 +5,7 @@ import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsAnalogOpticalDistanceSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -33,6 +34,7 @@ import static android.R.attr.name;
  * Created by Jyoti on 12/8/2016.
  */
 @Autonomous(name = "Slide and Shoot Blue", group = "Autonomous")
+@Disabled
 public class AutonomousBlueSlideAndShoot extends LinearVisionOpMode{
 
     // DC motors

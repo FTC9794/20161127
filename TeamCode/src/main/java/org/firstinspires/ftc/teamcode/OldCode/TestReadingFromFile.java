@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.OldCode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
@@ -14,6 +15,7 @@ import java.io.File;
  */
 
 @Autonomous(group = "test", name = "File Read test")
+@Disabled
 public class TestReadingFromFile extends LinearVisionOpMode{
 
 

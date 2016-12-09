@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.OldCode;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -21,6 +22,7 @@ import java.io.File;
  */
 
 @TeleOp(group = "Mecanum Drive", name = "TeleOp Blue Beacon Change")
+@Disabled
 public class LinearTeleOp3BlueBeaconChange extends LinearOpMode{
     DcMotor rf;
     DcMotor rb;
