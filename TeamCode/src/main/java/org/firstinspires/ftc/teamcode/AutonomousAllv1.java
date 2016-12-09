@@ -1,3 +1,7 @@
+/**
+ * Created by Jyoti on 12/7/2016.
+ */
+
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
@@ -16,7 +20,6 @@ import org.firstinspires.ftc.robotcore.internal.AppUtil;
 import org.lasarobotics.vision.android.Cameras;
 import org.lasarobotics.vision.ftc.resq.Beacon;
 import org.lasarobotics.vision.opmode.LinearVisionOpMode;
-import org.lasarobotics.vision.opmode.VisionOpMode;
 import org.lasarobotics.vision.opmode.extensions.CameraControlExtension;
 import org.lasarobotics.vision.util.ScreenOrientation;
 import org.opencv.core.Size;
@@ -25,13 +28,12 @@ import java.io.File;
 import java.util.Date;
 import java.util.Locale;
 
-import static android.R.attr.name;
-
 /**
- * Created by Jyoti on 12/8/2016.
+ * Created by Jyoti on 12/7/2016.
  */
-@Autonomous(name = "Slide and Shoot Blue", group = "Autonomous")
-public class AutonomousBlueSlideAndShoot extends LinearVisionOpMode{
+
+@Autonomous(group = "auto", name = "Auto All")
+public class AutonomousAllv1 extends LinearVisionOpMode {
 
     // DC motors
     DcMotor lf, lb, rf, rb, shooter, sweeper;
@@ -104,7 +106,235 @@ public class AutonomousBlueSlideAndShoot extends LinearVisionOpMode{
     Beacon.BeaconAnalysis beaconAnalysis;
     double imageConfidence;
 
-    Object[][] sequenceArray = new Object[][]{
+    String autoProgram;
+
+    Object[][] sequenceArray;
+
+    Object[][] blueFullArray = {
+            // STEP 1. START
+            {stateMachine.start},
+
+            //STEP 2. Add a delay in seconds if needed
+            {stateMachine.timeDelay, 0},
+
+            // Slide State Parameters
+            //      Angle -- Angle at which you slide
+            //      Power -- power for the motors
+            //      Switch Case -- what conditions we are testing (for example less than encoder)
+            //      Parameter for the test case
+            //      Orientation -- Orientation for the robot
+            //      Gain for the angle correction
+            // STEP 3. Move at a 45 degree angle until encoders are past -4100 at power 1
+            // Robot is at 0 orientation (facing forward) )
+            {stateMachine.slideState, 45, allPower, 2, -4100.0, 0.0, allPowerGain},
+
+            // STEP 4. Move towards the wall until the ultrasonic sensor is 40 cm; orientation is 0
+            {stateMachine.slideState, 90, highPower, 3, 40.0, 0.0, highGain},
+
+            // STEP 5. Move forward fast to get near line encoder position -955
+            {stateMachine.slideState, 0, highPower, 2, -700.0, 0.0, highGain},
+
+            // STEP 6. Move forward at slow speed until you see light sensor at Light Trigger
+            {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+
+            // STEP 7. Move to position to get camera image
+            {stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
+
+            //getColor State has 2 parameter,
+            //  1. which is the number of steps to skip if you don't resolve the color
+            //  2. Number of seconds to get the image
+
+            // STEP 8. Get the beacon colors
+            {stateMachine.getColor, 1, 1},
+
+
+            // STEP 9. Slide back to the white line
+            {stateMachine.slideState, 120, midPower, 6, whiteLightTrigger, 0.0, midGain},
+
+            // pushBeacon is either 1 for extend or 0 for retract must run the getColor state before this.
+            //
+            // STEP 10. Extend the beacon pusher
+            {stateMachine.pushBeacon, 1}, // 0 is retract, 1 is push
+
+            // STEP 11. Slide back to white line slowly if there was overshoot
+            {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+
+
+            // STEP 12. Slide to wall until 12 cm to push the beacon.
+            // A new case in slideState to be able to skip if the beacon is not detected
+            {stateMachine.slideState, 90, highPower, 7, pushBeaconDistance, 0.0, midGain},
+
+
+            // STEP 13. Start wheel shooter
+            {stateMachine.shooterWheel, shooterWheelPower},
+
+            // STEP 14. Back off the wall to the shooting distance from the wall
+            {stateMachine.slideState, -90, highPower, 4, shootingDistance, 0.0, highGain},
+
+
+            // STEP 15. Retract beacon pusher
+            {stateMachine.pushBeacon, 0}, // retracts beacon
+
+            // STEP 16. Move forward to shooting position
+            //{stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
+
+            // STEPS 17-20. Shoot 1st particle, wait 1 sec, Shoot 2nd particle, stop shooter
+            {stateMachine.triggerGate, shooterGateOpenTime},
+            //{stateMachine.timeDelay, 2}, // If you want to wait before starting, start here
+            //{stateMachine.triggerGate, shooterGateOpenTime},
+            {stateMachine.shooterWheel, 0.0},
+
+            // STEP 21 Move forward to second line at speed .75
+            {stateMachine.slideState, 0, highPower, 2, -2784.96, 0.0, highGain},
+
+            // STEP 22 Move sideways slowly to 40 cm from wall
+            {stateMachine.slideState, 90, highPower, 3, 40.0, 0.0, highGain},
+
+            // STEP 23 Move slowly to line
+            {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+
+            // STEP 24  Move to the camera position
+            {stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
+
+            // STEP 25. Get the beacon colors
+            {stateMachine.getColor, 1, 1},
+
+            // STEP 26. Slide back to the white line
+            {stateMachine.slideState, 120, midPower, 6, whiteLightTrigger, 0.0, midGain},
+
+            // STEP 27. Extend the beac0n pusher
+            {stateMachine.pushBeacon, 1}, // 0 is retract, 1 is push
+
+            // STEP 28. Slide back to white line slowly if there was overshoot
+            {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+
+            // STEP 29. Slide to wall until 12 cm to push the beacon.
+            {stateMachine.slideState, 90, highPower, 7, pushBeaconDistance, 0.0, highGain},
+
+            // STEP 30. Back off wall
+            {stateMachine.slideState, -90, highPower, 4, 35.0, 0.0, highGain},
+
+            // STEP 31. Retract beacon pusher
+            {stateMachine.pushBeacon, 0},
+
+            // STEP 32. slide to cap ball
+            {stateMachine.slideState, -135, allPower, 2, -2387.11, 0.0, allPowerGain},
+            {stateMachine.stop},
+    };
+
+    Object [][] redFullArray = {
+            // STEP 1. START
+            {stateMachine.start},
+
+            //STEP 2. Add a delay in seconds if needed
+            {stateMachine.timeDelay, 0},
+
+            // Slide State Parameters
+            //      Angle -- Angle at which you slide
+            //      Power -- power for the motors
+            //      Switch Case -- what conditions we are testing (for example less than encoder)
+            //      Parameter for the test case
+            //      Orientation -- Orientation for the robot
+            //      Gain for the angle correction
+            // STEP 3. Move at a 45 degree angle until encoders are past -4100 at power 1
+            // Robot is at 0 orientation (facing forward) )
+            {stateMachine.slideState, 45, allPower, 2, -4100.0, 0.0, allPowerGain},
+
+            // STEP 4. Move towards the wall until the ultrasonic sensor is 40 cm; orientation is 0
+            {stateMachine.slideState, 90, highPower, 3, 40.0, 0.0, highGain},
+
+            // STEP 5. Move forward fast to get near line encoder position -955
+            {stateMachine.slideState, 0, highPower, 2, -700.0, 0.0, highGain},
+
+            // STEP 6. Move forward at slow speed until you see light sensor at Light Trigger
+            {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+
+            // STEP 7. Move to position to get camera image
+            {stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
+
+            //getColor State has 2 parameter,
+            //  1. which is the number of steps to skip if you don't resolve the color
+            //  2. Number of seconds to get the image
+
+            // STEP 8. Get the beacon colors
+            {stateMachine.getColor, 1, 1},
+
+
+            // STEP 9. Slide back to the white line
+            {stateMachine.slideState, 120, midPower, 6, whiteLightTrigger, 0.0, midGain},
+
+            // pushBeacon is either 1 for extend or 0 for retract must run the getColor state before this.
+            //
+            // STEP 10. Extend the beacon pusher
+            {stateMachine.pushBeacon, 1}, // 0 is retract, 1 is push
+
+            // STEP 11. Slide back to white line slowly if there was overshoot
+            {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+
+
+            // STEP 12. Slide to wall until 12 cm to push the beacon.
+            // A new case in slideState to be able to skip if the beacon is not detected
+            {stateMachine.slideState, 90, highPower, 7, pushBeaconDistance, 0.0, midGain},
+
+
+            // STEP 13. Start wheel shooter
+            {stateMachine.shooterWheel, shooterWheelPower},
+
+            // STEP 14. Back off the wall to the shooting distance from the wall
+            {stateMachine.slideState, -90, highPower, 4, shootingDistance, 0.0, highGain},
+
+
+            // STEP 15. Retract beacon pusher
+            {stateMachine.pushBeacon, 0}, // retracts beacon
+
+            // STEP 16. Move forward to shooting position
+            //{stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
+
+            // STEPS 17-20. Shoot 1st particle, wait 1 sec, Shoot 2nd particle, stop shooter
+            {stateMachine.triggerGate, shooterGateOpenTime},
+            //{stateMachine.timeDelay, 2}, // If you want to wait before starting, start here
+            //{stateMachine.triggerGate, shooterGateOpenTime},
+            {stateMachine.shooterWheel, 0.0},
+
+            // STEP 21 Move forward to second line at speed .75
+            {stateMachine.slideState, 0, highPower, 2, -2784.96, 0.0, highGain},
+
+            // STEP 22 Move sideways slowly to 40 cm from wall
+            {stateMachine.slideState, 90, highPower, 3, 40.0, 0.0, highGain},
+
+            // STEP 23 Move slowly to line
+            {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+
+            // STEP 24  Move to the camera position
+            {stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
+
+            // STEP 25. Get the beacon colors
+            {stateMachine.getColor, 1, 1},
+
+            // STEP 26. Slide back to the white line
+            {stateMachine.slideState, 120, midPower, 6, whiteLightTrigger, 0.0, midGain},
+
+            // STEP 27. Extend the beac0n pusher
+            {stateMachine.pushBeacon, 1}, // 0 is retract, 1 is push
+
+            // STEP 28. Slide back to white line slowly if there was overshoot
+            {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+
+            // STEP 29. Slide to wall until 12 cm to push the beacon.
+            {stateMachine.slideState, 90, highPower, 7, pushBeaconDistance, 0.0, highGain},
+
+            // STEP 30. Back off wall
+            {stateMachine.slideState, -90, highPower, 4, 35.0, 0.0, highGain},
+
+            // STEP 31. Retract beacon pusher
+            {stateMachine.pushBeacon, 0},
+
+            // STEP 32. slide to cap ball
+            {stateMachine.slideState, -135, allPower, 2, -2387.11, 0.0, allPowerGain},
+            {stateMachine.stop},
+    };
+
+    Object[][] blueSlideAndShootArray = {
             // STEP 1. START
             {stateMachine.start},
 
@@ -153,10 +383,55 @@ public class AutonomousBlueSlideAndShoot extends LinearVisionOpMode{
             //STEP 9. Stop program, move to final state
             {stateMachine.stop},
     };
+    Object[][] redSlideAndShootArray = {
+            // STEP 1. START
+            {stateMachine.start},
 
-    {
-    }
+            //STEP 2. Add a delay in seconds if needed
+            {stateMachine.timeDelay, 0},
 
+            // Slide State Parameters
+            //      Angle -- Angle at which you slide
+            //      Power -- power for the motors
+            //      Switch Case -- what conditions we are testing (for example less than encoder)
+            //      Parameter for the test case
+            //      Orientation -- Orientation for the robot
+            //      Gain for the angle correction
+
+            //STEP 3. Start shooter
+            {stateMachine.shooterWheel, shooterWheelPower},
+
+            //STEP 4. Slide at -45 degrees until -3300 enconder counts at orientation 0.0
+            {stateMachine.slideState, -45, allPower, 2, -1900.0, 0.0, allPowerGain},
+
+
+
+            //STEP 5. Slide at 0 degrees until -820 encoder counts at orientation 0.0
+            {stateMachine.slideState, 0, highPower, 2, -1624.0, 0.0, highGain},
+
+
+
+            //STEP 6. Shoot
+            {stateMachine.triggerGate, shooterGateOpenTime},
+            {stateMachine.timeDelay, 2}, // If you want to wait before starting, start here
+            {stateMachine.triggerGate, shooterGateOpenTime},
+            //STEP 7. Stop shooter
+            {stateMachine.shooterWheel, 0.0},
+
+            //STEP 8. Push Cap ball
+            {stateMachine.slideState, 30, highPower, 2, -2000.0, 0.0, highGain},
+
+            //STEP 9. Move back to shooting position
+            {stateMachine.slideState, 210, highPower, 1, 2000.0, 0.0, highGain},
+            //STOP for testing
+            {stateMachine.stop},
+
+            //STEP 8. Slide at 0 degrees until -3300 encoder counts to push cap ball
+            {stateMachine.slideState, -90, allPower, 2, -3300.0, 0.0, allPowerGain},
+
+            //STEP 9. Stop program, move to final state
+            {stateMachine.stop},
+    };
     String formatDegrees(double degrees){
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
@@ -196,9 +471,9 @@ public class AutonomousBlueSlideAndShoot extends LinearVisionOpMode{
          * Enable extensions. Use what you need.
          * If you turn on the BEACON extension, it's best to turn on ROTATION too.
          */
-        enableExtension(VisionOpMode.Extensions.BEACON);         //Beacon detection
-        enableExtension(VisionOpMode.Extensions.ROTATION);       //Automatic screen rotation correction
-        enableExtension(VisionOpMode.Extensions.CAMERA_CONTROL); //Manual camera control
+        enableExtension(Extensions.BEACON);         //Beacon detection
+        enableExtension(Extensions.ROTATION);       //Automatic screen rotation correction
+        enableExtension(Extensions.CAMERA_CONTROL); //Manual camera control
 
         /**
          * Set the beacon analysis method
@@ -348,7 +623,36 @@ public class AutonomousBlueSlideAndShoot extends LinearVisionOpMode{
         drive = new MecanumDrive(rf, rb, lf, lb, imu, light, ultrasonic, null, telemetry, timer);
         telemetry.addData("Init", "done");
         telemetry.update();
-
+        boolean selected = false;
+        while(!selected){
+            if(gamepad1.x){
+                telemetry.addData("Program selected", "Blue Full Autonomous");
+                selected = true;
+                sequenceArray = blueFullArray;
+                autoProgram = "blueFull";
+            }else if(gamepad1.b){
+                telemetry.addData("Program selected", "Red Full Autonomous");
+                selected = true;
+                sequenceArray = redFullArray;
+                autoProgram = "redFull";
+            }else if(gamepad1.y){
+                telemetry.addData("Program selected", "Blue Slide and Shoot");
+                selected = true;
+                sequenceArray = blueSlideAndShootArray;
+                autoProgram = "blueSlide";
+            }else if(gamepad1.a){
+                telemetry.addData("Program selected", "Red Slide and Shoot");
+                selected = true;
+                sequenceArray = redSlideAndShootArray;
+                autoProgram = "redSlide";
+            }else{
+                telemetry.addData("Press X", "Blue Full Autonomous");
+                telemetry.addData("Press B", "Red Full Autonomous");
+                telemetry.addData("Press Y", "Red Slide and Shoot");
+                telemetry.addData("Press A", "Blue Slide and Shoot");
+            }
+            telemetry.update();
+        }
         waitForStart();
 
         while(opModeIsActive()){
@@ -507,7 +811,7 @@ public class AutonomousBlueSlideAndShoot extends LinearVisionOpMode{
                             }
                             break;
                         case 7: //goes while US level is greater than desired only if the
-                            //red blue is detected
+                                //red blue is detected
                             if (rightOrLeft.equals("red, blue")|| rightOrLeft.equals("blue, red")) {
                                 if (drive.slideAngleIMU(((Integer) sequenceArray[seqCounter][1]).doubleValue(), (double) sequenceArray[seqCounter][2], ultrasonic.cmUltrasonic() > (double) sequenceArray[seqCounter][4], (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]) == 1) {
                                     telemetry.addData("state", ultrasonic.cmUltrasonic());
@@ -552,9 +856,9 @@ public class AutonomousBlueSlideAndShoot extends LinearVisionOpMode{
 
                 case pivotRobot:
                     // pivot to angle for a certain time
-                    if (timer.seconds()<(double) sequenceArray[seqCounter][3]){
+                    if (timer.seconds()<(int) sequenceArray[seqCounter][3]){
                         drive.pivotToAngleIMU((double) sequenceArray[seqCounter][1], (double) sequenceArray[seqCounter][2], true, (double) sequenceArray[seqCounter][4],(double) sequenceArray[seqCounter][5]);
-                    } else
+                        } else
                     {
                         timer.reset();
                         drive.resetEncoders();
@@ -569,7 +873,22 @@ public class AutonomousBlueSlideAndShoot extends LinearVisionOpMode{
     @Override
     public void stop(){
         super.stop();
-        endGyro = -imu.getAngularOrientation().firstAngle;
+        String filename = "lastGyroValue.txt";
+        File file = AppUtil.getInstance().getSettingsFile(filename);
+        float gyroStop;
+        if(autoProgram.equals("blueFull")){
+            gyroStop = -imu.getAngularOrientation().firstAngle;
+        }else if(autoProgram.equals("redFull")){
+            gyroStop = (-imu.getAngularOrientation().firstAngle+180)%360;
+        }else if(autoProgram.equals("blueSlide")){
+            gyroStop = (-imu.getAngularOrientation().firstAngle-90)%360;
+        }else if(autoProgram.equals("redSlide")){
+            gyroStop = (-imu.getAngularOrientation().firstAngle-90)%360;
+        }else{
+            gyroStop = -imu.getAngularOrientation().firstAngle;
+        }
+        ReadWriteFile.writeFile(file, String.valueOf(gyroStop));
     }
 
 }
+

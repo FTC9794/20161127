@@ -1,11 +1,10 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.OldCode;
 
 import com.qualcomm.hardware.adafruit.BNO055IMU;
 import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsAnalogOpticalDistanceSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -14,9 +13,12 @@ import com.qualcomm.robotcore.util.ReadWriteFile;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
+import org.firstinspires.ftc.teamcode.DataLogger;
+import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.lasarobotics.vision.android.Cameras;
 import org.lasarobotics.vision.ftc.resq.Beacon;
 import org.lasarobotics.vision.opmode.LinearVisionOpMode;
+import org.lasarobotics.vision.opmode.VisionOpMode;
 import org.lasarobotics.vision.opmode.extensions.CameraControlExtension;
 import org.lasarobotics.vision.util.ScreenOrientation;
 import org.opencv.core.Size;
@@ -25,12 +27,13 @@ import java.io.File;
 import java.util.Date;
 import java.util.Locale;
 
+import static android.R.attr.name;
+
 /**
- * Created by Ishaan Oberoi on 12/1/2016.
+ * Created by Jyoti on 12/8/2016.
  */
-@Autonomous(group = "auto", name = "Auto Blue Slide and Shoot")
-@Disabled
-public class AutonomousBlueSlideAndShootOld extends LinearVisionOpMode {
+@Autonomous(name = "Slide and Shoot Blue", group = "Autonomous")
+public class AutonomousBlueSlideAndShoot extends LinearVisionOpMode{
 
     // DC motors
     DcMotor lf, lb, rf, rb, shooter, sweeper;
@@ -49,8 +52,6 @@ public class AutonomousBlueSlideAndShootOld extends LinearVisionOpMode {
     enum stateMachine {
         start, timeDelay, slideState, getColor, pushBeacon, shooterWheel, triggerGate, stop, pivotRobot
     };
-
-
 
     stateMachine state;
 
@@ -106,32 +107,79 @@ public class AutonomousBlueSlideAndShootOld extends LinearVisionOpMode {
     double imageConfidence;
 
     Object[][] sequenceArray = new Object[][]{
+            // STEP 1. START
             {stateMachine.start},
-            {stateMachine.timeDelay, 10},
-            {stateMachine.slideState, 270, 1.0, 1, 750.0, 0.0, 0.0005},
-            {stateMachine.slideState, 0, .5, 2, -4200.0, 0.0, 0.01},
-            {stateMachine.shooterWheel,.325},
-            //{stateMachine.slideState, 270, 1.0, 5, 2.0, 0.0, 0.005},
-            {stateMachine.pivotRobot, 90, .1, 1, 1, 1, .05},
-            {stateMachine.pivotRobot, 0, .1, 1, 1, 1, .05},
-            {stateMachine.slideState, 270, 1.0, 5, .5, 0.0, 0.005},
+
+            //STEP 2. Add a delay in seconds if needed
+            {stateMachine.timeDelay, 0},
+
+            // Slide State Parameters
+            //      Angle -- Angle at which you slide
+            //      Power -- power for the motors
+            //      Switch Case -- what conditions we are testing (for example less than encoder)
+            //      Parameter for the test case
+            //      Orientation -- Orientation for the robot
+            //      Gain for the angle correction
+
+            //STEP 3. Start shooter
+            {stateMachine.shooterWheel, shooterWheelPower},
+
+            //STEP 4. Slide at -45 degrees until -3300 enconder counts at orientation 0.0
+            {stateMachine.slideState, -45, allPower, 2, -1900.0, 0.0, allPowerGain},
+
+
+
+            //STEP 5. Slide at 0 degrees until -820 encoder counts at orientation 0.0
+            {stateMachine.slideState, 0, highPower, 2, -1624.0, 0.0, highGain},
+
+
+
+            //STEP 6. Shoot
+            {stateMachine.triggerGate, shooterGateOpenTime},
+            {stateMachine.timeDelay, 2}, // If you want to wait before starting, start here
+            {stateMachine.triggerGate, shooterGateOpenTime},
+            //STEP 7. Stop shooter
+            {stateMachine.shooterWheel, 0.0},
+
+            //STEP 8. Push Cap ball
+            {stateMachine.slideState, 30, highPower, 2, -2000.0, 0.0, highGain},
+
+            //STEP 9. Move back to shooting position
+            {stateMachine.slideState, 210, highPower, 1, 2000.0, 0.0, highGain},
+            //STOP for testing
+            {stateMachine.stop},
+
+            //STEP 8. Slide at 0 degrees until -3300 encoder counts to push cap ball
+            {stateMachine.slideState, -90, allPower, 2, -3300.0, 0.0, allPowerGain},
+
+            //STEP 9. Stop program, move to final state
             {stateMachine.stop},
     };
+
+    {
+    }
+
     String formatDegrees(double degrees){
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
+
     double formatAngle(AngleUnit angleUnit, double angle) {
         return Double.parseDouble(formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle)));
     }
+
     public int average4Motors(int a, int b, int c, int d) {
         return (int) (a + b + c + d) / 4;
     }
+
     @Override
     public void runOpMode() throws InterruptedException {
+        data = new DataLogger(day.toString() + " autonomous data");
+
         //Wait for vision to initialize - this should be the first thing you do
         waitForVisionStart();
         telemetry.addData("Init", "vision started");
         telemetry.update();
+
         /**
          * Set the camera used for detection
          * PRIMARY = Front-facing, larger camera
@@ -150,9 +198,9 @@ public class AutonomousBlueSlideAndShootOld extends LinearVisionOpMode {
          * Enable extensions. Use what you need.
          * If you turn on the BEACON extension, it's best to turn on ROTATION too.
          */
-        enableExtension(Extensions.BEACON);         //Beacon detection
-        enableExtension(Extensions.ROTATION);       //Automatic screen rotation correction
-        enableExtension(Extensions.CAMERA_CONTROL); //Manual camera control
+        enableExtension(VisionOpMode.Extensions.BEACON);         //Beacon detection
+        enableExtension(VisionOpMode.Extensions.ROTATION);       //Automatic screen rotation correction
+        enableExtension(VisionOpMode.Extensions.CAMERA_CONTROL); //Manual camera control
 
         /**
          * Set the beacon analysis method
@@ -212,18 +260,20 @@ public class AutonomousBlueSlideAndShootOld extends LinearVisionOpMode {
         rb = hardwareMap.dcMotor.get("right_back");
         lf = hardwareMap.dcMotor.get("left_front");
         lb = hardwareMap.dcMotor.get("left_back");
+
         leftBeacon = hardwareMap.servo.get("left_beacon");
         rightBeacon = hardwareMap.servo.get("right_beacon");
         shooterGate = hardwareMap.servo.get("shooter_gate");
-        leftBeacon.setPosition(0);
-        rightBeacon.setPosition(1);
-        shooterGate.setPosition(.5);
+
+        leftBeacon.setPosition(leftBeaconRetract);
+        rightBeacon.setPosition(rightBeaconRetract);
+        shooterGate.setPosition(shooterGateClosed);
+
         //make it so when the powers are set to 0, the motors will stop and not move
         rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
 
         //reverse the directions of the right motors
         lf.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -302,6 +352,7 @@ public class AutonomousBlueSlideAndShootOld extends LinearVisionOpMode {
         telemetry.update();
 
         waitForStart();
+
         while(opModeIsActive()){
             switch ((stateMachine) sequenceArray[seqCounter][0]) {
                 case start:
@@ -503,7 +554,7 @@ public class AutonomousBlueSlideAndShootOld extends LinearVisionOpMode {
 
                 case pivotRobot:
                     // pivot to angle for a certain time
-                    if (timer.seconds()<(int) sequenceArray[seqCounter][3]){
+                    if (timer.seconds()<(double) sequenceArray[seqCounter][3]){
                         drive.pivotToAngleIMU((double) sequenceArray[seqCounter][1], (double) sequenceArray[seqCounter][2], true, (double) sequenceArray[seqCounter][4],(double) sequenceArray[seqCounter][5]);
                     } else
                     {
@@ -513,7 +564,6 @@ public class AutonomousBlueSlideAndShootOld extends LinearVisionOpMode {
                     }
                     break;
             }
-
             telemetry.update();
         }
 

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.OldCode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.ReadWriteFile;
@@ -10,12 +10,11 @@ import java.io.File;
 
 /**
  * Created by Jyoti on 12/9/2016.
- * The name is not accurate. This file writes to a file called configuration.txt.
- * You can see the file in Phone/FIRST/settings/configuration.txt
+ * This class reads from the file configuration.txt in Phone/FIRST/settings.
  */
 
-@Autonomous(group = "test", name = "File Write test")
-public class TestReadWriteFromFile extends LinearVisionOpMode{
+@Autonomous(group = "test", name = "File Read test")
+public class TestReadingFromFile extends LinearVisionOpMode{
 
 
     @Override
@@ -23,6 +22,8 @@ public class TestReadWriteFromFile extends LinearVisionOpMode{
         waitForStart();
         String filename = "configuration.txt";
         File file = AppUtil.getInstance().getSettingsFile(filename);
-        ReadWriteFile.writeFile(file, "jyoti");
+
+        String s = ReadWriteFile.readFile(file);
+        telemetry.addData("data read",s );
     }
 }
