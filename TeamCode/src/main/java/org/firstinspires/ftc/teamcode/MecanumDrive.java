@@ -158,49 +158,55 @@ public class MecanumDrive {
             return 0;
         }
     }
-
     public int pivotToAngleIMU(double desiredAngle, double gain, boolean endCase, double maxSpeed, double minSpeed) {
+        //set speeds until time is up
         if (endCase) {
             //measure the gyro sensor
             //get gyro sensor value
             Orientation o = imu.getAngularOrientation();
             double currentAngle = -o.firstAngle;
             double difference = desiredAngle - currentAngle;
-            double magSpeed = 0;
+            if(difference>180){
+                difference-=360;
+            }else if(difference<-180){
+                difference+=360;
+            }
 
-            double turnDirection = 1; // 1 is clockwise; -1 is counterclockwise
-
-            if (difference >0) {
-                // Desired angle is greater than current, turn clockwise
-                turnDirection = 1;
-
-            // if you need to turn more than 180 degrees, turn the opposite way
-            // set the magnitude of the speed to be proportional to the difference
-            // if you are more than 180 degrees away, you need to subtract the difference from 360
-            if (Math.abs(difference)>180){
-                turnDirection = -turnDirection;
-                // magintude of the speed is proportional to the difference and the gain
-                magSpeed = (360-(Math.abs(difference)) * gain) ;
-            } else
-                magSpeed = Math.abs(difference)*gain ;
-
-
-            // never go above the max speed or below min speed
-
+            double magSpeed = Math.abs(difference * gain);
+            telemetry.addData("Mag speed", magSpeed);
             if(magSpeed > maxSpeed){
                 magSpeed = maxSpeed;
             }
             if(magSpeed<minSpeed){
                 magSpeed = minSpeed;
             }
-            telemetry.addData("Mag speed", magSpeed);
-
-            rf.setPower(magSpeed*turnDirection);
-            rb.setPower(magSpeed*turnDirection);
-            lf.setPower(-magSpeed*turnDirection);
-            lb.setPower(-magSpeed*turnDirection);
+            if(difference<0){
+                rf.setPower(magSpeed);
+                rb.setPower(magSpeed);
+                lf.setPower(-magSpeed);
+                lb.setPower(-magSpeed);
+            }else{
+                rf.setPower(-magSpeed);
+                rb.setPower(-magSpeed);
+                lf.setPower(magSpeed);
+                lb.setPower(magSpeed);
             }
-
+/*
+            //determine the new speed
+            angleDifference = currentAngle - angle;
+            newSpeed = -angleDifference * gain;
+            //set limits
+            if (newSpeed > maxSpeed) {
+                newSpeed = maxSpeed;
+            } else if (newSpeed < -maxSpeed) {
+                newSpeed = -maxSpeed;
+            }
+            if (newSpeed < minSpeed && newSpeed > 0) {
+                newSpeed = minSpeed;
+            } else if (newSpeed > -minSpeed && newSpeed < 0) {
+                newSpeed = -minSpeed;
+            }
+*/
             //send back data about what the robot is doing
 
 
@@ -212,7 +218,62 @@ public class MecanumDrive {
             return 0;
         }
     }
+/*
+    public int pivotToAngleIMU(double desiredAngle, double gain, boolean endCase, double maxSpeed, double minSpeed) {
+        if (endCase) {
+            //measure the gyro sensor
+            //get gyro sensor value
+            Orientation o = imu.getAngularOrientation();
+            double currentAngle = -o.firstAngle;
+            double difference = desiredAngle - currentAngle;
+            double magSpeed = 0.0;
 
+            double turnDirection = 1.0; // 1 is clockwise; -1 is counterclockwise
+
+            if (difference >0) {
+                // Desired angle is greater than current, turn clockwise
+                turnDirection = 1.0;
+            }
+
+            // if you need to turn more than 180 degrees, turn the opposite way
+            // set the magnitude of the speed to be proportional to the difference
+            // if you are more than 180 degrees away, you need to subtract the difference from 360
+            if (Math.abs(difference)>180){
+                turnDirection = -turnDirection;
+                magSpeed = (360-(Math.abs(difference)) * gain) ;
+            } else {
+                magSpeed = Math.abs(difference) * gain;
+            }
+
+
+            // never go above the max speed or below min speed
+
+            if(magSpeed > maxSpeed){
+                magSpeed = maxSpeed;
+            }
+            if(magSpeed<minSpeed){
+                magSpeed = minSpeed;
+            }
+
+            rf.setPower(magSpeed*turnDirection);
+            rb.setPower(magSpeed*turnDirection);
+            lf.setPower(-magSpeed*turnDirection);
+            lb.setPower(-magSpeed*turnDirection);
+
+
+            //send back data about what the robot is doing
+
+
+            telemetry.addData("Angle", currentAngle);
+            telemetry.addData("Mag speed", magSpeed);
+            telemetry.addData("Desired Angle", desiredAngle);
+            telemetry.addData("angle difference", currentAngle-desiredAngle);
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+*/
     /*
     Inputs:         Speeds: Four doubles from -1 to 1 representing the speed of each motor (RF, RB, LF, LB)
                     Desired Light: The amount of reflected light the robot needs to follow (0 to 1)
