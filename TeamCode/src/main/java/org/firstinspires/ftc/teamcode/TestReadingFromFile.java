@@ -10,6 +10,7 @@ import java.io.File;
 
 /**
  * Created by Jyoti on 12/9/2016.
+ * This class reads from the file configuration.txt in Phone/FIRST/settings.
  */
 
 @Autonomous(group = "test", name = "File Read test")

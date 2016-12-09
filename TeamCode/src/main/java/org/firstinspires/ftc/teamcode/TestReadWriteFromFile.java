@@ -10,6 +10,8 @@ import java.io.File;
 
 /**
  * Created by Jyoti on 12/9/2016.
+ * The name is not accurate. This file writes to a file called configuration.txt.
+ * You can see the file in Phone/FIRST/settings/configuration.txt
  */
 
 @Autonomous(group = "test", name = "File Write test")
