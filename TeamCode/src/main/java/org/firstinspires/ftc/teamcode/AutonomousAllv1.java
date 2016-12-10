@@ -707,12 +707,12 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     // push for 1. retract for any other value.
                     telemetry.addData("color", rightOrLeft);
                     if ((int) sequenceArray[seqCounter][1] == 1) {
-                        if (rightOrLeft.equals("red, blue")) {
+                        if (rightOrLeft.equals("red, blue")&&autoProgram.equals("redFull")||rightOrLeft.equals("blue, red")&&autoProgram.equals("blueFull")) {
                             // Since this is blue auto, we have to press the blue.
                             leftBeacon.setPosition(leftBeaconExtend); // extend left beacon
                             rightBeacon.setPosition(rightBeaconRetract); // retract right beacon because it is inverted
                             // just for safety
-                        } else if(rightOrLeft.equals("blue, red")) {
+                        } else if(rightOrLeft.equals("blue, red")&&autoProgram.equals("redFull")||rightOrLeft.equals("red, blue")&&autoProgram.equals("blueFull")) {
                             rightBeacon.setPosition(rightBeaconExtend); // extend right beacon
                             leftBeacon.setPosition(leftBeaconRetract); // retract left beacon. for safety
                         }
