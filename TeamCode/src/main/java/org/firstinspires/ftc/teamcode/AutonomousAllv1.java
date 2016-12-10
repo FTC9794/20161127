@@ -153,7 +153,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             // pushBeacon is either 1 for extend or 0 for retract must run the getColor state before this.
             //
             // STEP 10. Extend the beacon pusher
-            {stateMachine.pushBeacon, 1}, // 0 is retract, 1 is push
+            {stateMachine.pushBeacon, 1, "blue"}, // 0 is retract, 1 is push
 
             // STEP 11. Slide back to white line slowly if there was overshoot
             {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
@@ -201,7 +201,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.slideState, 120, midPower, 6, whiteLightTrigger, 0.0, midGain},
 
             // STEP 27. Extend the beac0n pusher
-            {stateMachine.pushBeacon, 1}, // 0 is retract, 1 is push
+            {stateMachine.pushBeacon, 1, "blue"}, // 0 is retract, 1 is push
 
             // STEP 28. Slide back to white line slowly if there was overshoot
             {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
@@ -266,7 +266,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             // pushBeacon is either 1 for extend or 0 for retract must run the getColor state before this.
             //
             // STEP 10. Extend the beacon pusher
-            {stateMachine.pushBeacon, 1}, // 0 is retract, 1 is push
+            {stateMachine.pushBeacon, 1, "red"}, // 0 is retract, 1 is push
 
             // STEP 11. Slide back to white line slowly if there was overshoot
             {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
@@ -314,7 +314,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.slideState, 120, midPower, 6, whiteLightTrigger, 0.0, midGain},
 
             // STEP 27. Extend the beac0n pusher
-            {stateMachine.pushBeacon, 1}, // 0 is retract, 1 is push
+            {stateMachine.pushBeacon, 1, "red"}, // 0 is retract, 1 is push
 
             // STEP 28. Slide back to white line slowly if there was overshoot
             {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
@@ -376,7 +376,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.slideState, 120, highPower, 1, 750.0, 0.0, highGain},
 
             //STEP 8. Slide at 0 degrees until -3300 encoder counts to push cap ball
-            {stateMachine.slideState, 270, allPower, 5, 1.5, 0.0, allPowerGain},
+            {stateMachine.slideState, 270, allPower, 5, 2.0, 0.0, allPowerGain},
 
             //STEP 9. Stop program, move to final state
             {stateMachine.stop},
@@ -707,12 +707,12 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     // push for 1. retract for any other value.
                     telemetry.addData("color", rightOrLeft);
                     if ((int) sequenceArray[seqCounter][1] == 1) {
-                        if (rightOrLeft.equals("red, blue")&&autoProgram.equals("redFull")||rightOrLeft.equals("blue, red")&&autoProgram.equals("blueFull")) {
+                        if ((rightOrLeft.equals("red, blue")&&((String)sequenceArray[seqCounter][2]).equals("red"))||(rightOrLeft.equals("blue, red")&&((String)sequenceArray[seqCounter][2]).equals("blue"))) {
                             // Since this is blue auto, we have to press the blue.
                             leftBeacon.setPosition(leftBeaconExtend); // extend left beacon
                             rightBeacon.setPosition(rightBeaconRetract); // retract right beacon because it is inverted
                             // just for safety
-                        } else if(rightOrLeft.equals("blue, red")&&autoProgram.equals("redFull")||rightOrLeft.equals("red, blue")&&autoProgram.equals("blueFull")) {
+                        } else if((rightOrLeft.equals("blue, red")&((String)sequenceArray[seqCounter][2]).equals("red"))||(rightOrLeft.equals("red, blue")&&((String)sequenceArray[seqCounter][2]).equals("blueFull"))) {
                             rightBeacon.setPosition(rightBeaconExtend); // extend right beacon
                             leftBeacon.setPosition(leftBeaconRetract); // retract left beacon. for safety
                         }
