@@ -69,8 +69,8 @@ public class LinearTeleOpAll extends LinearOpMode{
         rightBeacon = hardwareMap.servo.get("right_beacon");
         shooterGate = hardwareMap.servo.get("shooter_gate");
 
-        leftBeacon.setPosition(0.02);
-        rightBeacon.setPosition(.98);
+        leftBeacon.setPosition(1);
+        rightBeacon.setPosition(0);
         shooterGate.setPosition(.5);
 
         shooterToggle = false;
