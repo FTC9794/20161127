@@ -1,5 +1,5 @@
 /**
- * Created by Jyoti on 12/7/2016.
+ * Created by Ishaan on 12/7/2016.
  */
 
 package org.firstinspires.ftc.teamcode;
@@ -29,7 +29,7 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
- * Created by Jyoti on 12/7/2016.
+ * Created by Ishaan on 12/7/2016.
  */
 
 @Autonomous(group = "auto", name = "Auto All")
@@ -85,7 +85,6 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     double shootingDistance = 50;
 
     // Speeds
-
     double highPower = .75;
     double highGain = 0.01;
 
@@ -180,8 +179,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
             // STEPS 17-20. Shoot 1st particle, wait 1 sec, Shoot 2nd particle, stop shooter
             {stateMachine.triggerGate, shooterGateOpenTime},
-            //{stateMachine.timeDelay, 2}, // If you want to wait before starting, start here
-            //{stateMachine.triggerGate, shooterGateOpenTime},
+
             {stateMachine.shooterWheel, 0.0},
 
             // STEP 21 Move forward to second line at speed .75
@@ -222,6 +220,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.stop},
     };
 
+    //Array for full red autonomous
     Object [][] redFullArray = {
             // STEP 1. START
             {stateMachine.start},
@@ -293,8 +292,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
             // STEPS 17-20. Shoot 1st particle, wait 1 sec, Shoot 2nd particle, stop shooter
             {stateMachine.triggerGate, shooterGateOpenTime},
-            //{stateMachine.timeDelay, 2}, // If you want to wait before starting, start here
-            //{stateMachine.triggerGate, shooterGateOpenTime},
+
             {stateMachine.shooterWheel, 0.0},
 
             // STEP 21 Move forward to second line at speed .75
@@ -335,6 +333,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.stop},
     };
 
+    //Array for slide and shoot program for blue alliance
     Object[][] blueSlideAndShootArray = {
             // STEP 1. START
             {stateMachine.start},
@@ -382,6 +381,8 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             //STEP 9. Stop program, move to final state
             {stateMachine.stop},
     };
+
+    //Array for slide and shoot program for red alliance
     Object[][] redSlideAndShootArray = {
             // STEP 1. START
             {stateMachine.start},
@@ -403,14 +404,9 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             //STEP 4. Slide at -45 degrees until -3300 enconder counts at orientation 0.0
             {stateMachine.slideState, -135, allPower, 1, 3800.0, 0.0, allPowerGain},
 
-
-
             //STEP 5. Slide at 0 degrees until -820 encoder counts at orientation 0.0
             {stateMachine.slideState, 180, highPower, 1, 700.0, 0.0, highGain},
             {stateMachine.slideState, 180, lowPower, 1, 700.0, 0.0, lowGain},
-
-
-
 
             //STEP 6. Shoot
             {stateMachine.triggerGate, shooterGateOpenTime},
@@ -623,6 +619,8 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
         telemetry.addData("Init", "done");
         telemetry.update();
         boolean selected = false;
+
+        //Use gamepad inputs to choose whih program will run
         while(!selected){
             if(gamepad1.x){
                 telemetry.addData("Program selected", "Blue Full Autonomous");
