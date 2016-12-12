@@ -19,8 +19,8 @@ import java.io.File;
  * Created by Ishaan Oberoi on 12/1/2016.
  */
 
-@TeleOp(group = "Mecanum Drive", name = "TeleOp All`")
-public class LinearTeleOpAll extends LinearOpMode{
+@TeleOp(group = "Mecanum Drive", name = "TeleOp All + Cap Ball")
+public class LinearTeleOpAllCapBall extends LinearOpMode{
     DcMotor rf;
     DcMotor rb;
     DcMotor lf;
@@ -30,6 +30,8 @@ public class LinearTeleOpAll extends LinearOpMode{
     Servo leftBeacon;
     Servo rightBeacon;
     Servo shooterGate;
+    Servo leftBottomCapBall;
+    Servo rightBottomCapBall;
     MecanumDrive drive;
     ElapsedTime shooterTime;
     ElapsedTime shooterToggleTimer;
@@ -45,6 +47,11 @@ public class LinearTeleOpAll extends LinearOpMode{
     boolean harvestToggle;
     double offset;
     double shootingSpeed = .325;
+    double capBallIncrement = 0;
+    double leftBottomCapBallStart = 1.0;
+    double rightBottomCapBallStart = 0.0;
+    double leftCapBallOpenPosition = 0.3;
+    double rightCapBallOpenPosition = .7;
     @Override
     public void runOpMode() throws InterruptedException {
         rf = hardwareMap.dcMotor.get("right_front");
@@ -68,11 +75,13 @@ public class LinearTeleOpAll extends LinearOpMode{
         leftBeacon = hardwareMap.servo.get("left_beacon");
         rightBeacon = hardwareMap.servo.get("right_beacon");
         shooterGate = hardwareMap.servo.get("shooter_gate");
-
+        leftBottomCapBall = hardwareMap.servo.get("lb_cap_ball");
+        rightBottomCapBall = hardwareMap.servo.get("rb_cap_ball");
         leftBeacon.setPosition(1);
         rightBeacon.setPosition(0);
         shooterGate.setPosition(.5);
-
+        leftBottomCapBall.setPosition(leftBottomCapBallStart);
+        rightBottomCapBall.setPosition(rightBottomCapBallStart);
         shooterToggle = false;
         harvestToggle = false;
 
@@ -194,11 +203,37 @@ public class LinearTeleOpAll extends LinearOpMode{
             if(gamepad2.a){
                 sweeper.setPower(-1);
             }
-
-            if(gamepad1.b){
-                leftBeacon.setPosition(0);
-            }else{
-                leftBeacon.setPosition(1);
+            if(gamepad2.dpad_left){
+                capBallIncrement+=.01;
+                if(capBallIncrement + leftBottomCapBallStart>leftCapBallOpenPosition){
+                    leftBottomCapBall.setPosition(leftCapBallOpenPosition);
+                }else{
+                    leftBottomCapBall.setPosition(leftBottomCapBallStart-capBallIncrement);
+                }
+                if(capBallIncrement + rightBottomCapBallStart>leftCapBallOpenPosition){
+                    rightBottomCapBall.setPosition(rightCapBallOpenPosition);
+                }else{
+                    rightBottomCapBall.setPosition(rightBottomCapBallStart-capBallIncrement);
+                }
+                if(capBallIncrement>1){
+                    capBallIncrement=1;
+                }
+            }
+            if(gamepad2.dpad_right){
+                capBallIncrement-=.01;
+                if(capBallIncrement + leftBottomCapBallStart<leftBottomCapBallStart){
+                    leftBottomCapBall.setPosition(leftBottomCapBallStart);
+                }else{
+                    leftBottomCapBall.setPosition(leftBottomCapBallStart-capBallIncrement);
+                }
+                if(capBallIncrement + rightBottomCapBallStart<leftBottomCapBallStart){
+                    rightBottomCapBall.setPosition(rightBottomCapBallStart);
+                }else{
+                    rightBottomCapBall.setPosition(rightBottomCapBallStart-capBallIncrement);
+                }
+                if(capBallIncrement<0){
+                    capBallIncrement=0;
+                }
             }
             telemetry.update();
         }

@@ -43,6 +43,8 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
     // State used for updating telemetry
     Servo leftBeacon, rightBeacon, shooterGate;
+    Servo leftBottomCapBall, rightBottomCapBall;
+
 
     ModernRoboticsI2cRangeSensor ultrasonic;
     ModernRoboticsAnalogOpticalDistanceSensor light;
@@ -64,7 +66,10 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     int seqCounter = 0;
 
     MecanumDrive drive;
-    String rightOrLeft;
+    String rightOrLeft = "";
+
+    double leftBottomCapBallStart = 1.0;
+    double rightBottomCapBallStart = 0.0;
 
     // Shooter and shooter gate
     double shooterGateOpen = 0;
@@ -98,7 +103,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     double allPowerGain = 0.01;
 
     //We want to push the beacon when our robot is 10 cm away from the wall
-    double pushBeaconDistance = 8;
+    double pushBeaconDistance = 6;
 
     public static double endGyro;
 
@@ -128,7 +133,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.slideState, 45, allPower, 2, -4100.0, 0.0, allPowerGain},
 
             // STEP 4. Move towards the wall until the ultrasonic sensor is 40 cm; orientation is 0
-            {stateMachine.slideState, 90, highPower, 3, 40.0, 0.0, highGain},
+            {stateMachine.slideState, 90, highPower, 3, 45.0, 0.0, highGain},
 
             // STEP 5. Move forward fast to get near line encoder position -955
             {stateMachine.slideState, 0, highPower, 2, -700.0, 0.0, highGain},
@@ -186,7 +191,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.slideState, 0, highPower, 2, -2784.96, 0.0, highGain},
 
             // STEP 22 Move sideways slowly to 40 cm from wall
-            {stateMachine.slideState, 90, highPower, 3, 40.0, 0.0, highGain},
+            {stateMachine.slideState, 90, highPower, 3, 45.0, 0.0, highGain},
 
             // STEP 23 Move slowly to line
             {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
@@ -241,7 +246,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
 
             // STEP 4. Move towards the wall until the ultrasonic sensor is 40 cm; orientation is 0
-            {stateMachine.slideState, 90, highPower, 3, 40.0, 0.0, highGain},
+            {stateMachine.slideState, 90, highPower, 3, 45.0, 0.0, highGain},
 
             // STEP 5. Move forward fast to get near line encoder position -955
             {stateMachine.slideState, 180, highPower, 1, 700.0, 0.0, highGain},
@@ -299,7 +304,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.slideState, 180, highPower, 1, 2784.96, 0.0, highGain},
 
             // STEP 22 Move sideways slowly to 40 cm from wall
-            {stateMachine.slideState, 90, highPower, 3, 40.0, 0.0, highGain},
+            {stateMachine.slideState, 90, highPower, 3, 45.0, 0.0, highGain},
 
             // STEP 23 Move slowly to line
             {stateMachine.slideState, 180, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
@@ -339,7 +344,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.start},
 
             //STEP 2. Add a delay in seconds if needed
-            {stateMachine.timeDelay, 5},
+            {stateMachine.timeDelay, 7},
 
             // Slide State Parameters
             //      Angle -- Angle at which you slide
@@ -357,7 +362,8 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
 
             //STEP 5. Slide at 0 degrees until -820 encoder counts at orientation 0.0
-            {stateMachine.slideState, 0, highPower, 2, -1624.0, 0.0, highGain},
+            {stateMachine.slideState, 0, highPower, 2, -700.0, 0.0, highGain},
+            {stateMachine.slideState, 0, lowPower, 2, -700.0, 0.0, lowGain},
 
 
             //STEP 6. Shoot
@@ -531,9 +537,15 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
         rightBeacon = hardwareMap.servo.get("right_beacon");
         shooterGate = hardwareMap.servo.get("shooter_gate");
 
+        leftBottomCapBall = hardwareMap.servo.get("lb_cap_ball");
+        rightBottomCapBall = hardwareMap.servo.get("rb_cap_ball");
+
         leftBeacon.setPosition(leftBeaconRetract);
         rightBeacon.setPosition(rightBeaconRetract);
         shooterGate.setPosition(shooterGateClosed);
+
+        leftBottomCapBall.setPosition(leftBottomCapBallStart);
+        rightBottomCapBall.setPosition(rightBottomCapBallStart);
 
         //make it so when the powers are set to 0, the motors will stop and not move
         rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -879,6 +891,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     }
                     break;
             }
+            telemetry.addData("color", rightOrLeft);
             telemetry.update();
         }
 
