@@ -31,6 +31,39 @@ import java.util.List;
  * Static beacon analysis methods
  */
 class BeaconAnalyzer {
+    static Beacon.BeaconAnalysis analyze_VVBeacon(List<Contour> contoursRed, List<Contour> contoursBlue,
+                                                  Mat img, ScreenOrientation orientation, boolean debug){
+        //DEBUG Draw contours before filtering
+        if (debug) Drawing.drawContours(img, contoursRed, new ColorRGBA("#FF0000"), 2);
+        if (debug) Drawing.drawContours(img, contoursBlue, new ColorRGBA("#0000FF"), 2);
+
+        //Get the largest contour in each - we're calling this one the main light
+        int largestIndexRed = findLargestIndex(contoursRed);
+        int largestIndexBlue = findLargestIndex(contoursBlue);
+        Contour largestRed = (largestIndexRed != -1) ? contoursRed.get(largestIndexRed) : null;
+        Contour largestBlue = (largestIndexBlue != -1) ? contoursBlue.get(largestIndexBlue) : null;
+
+        if (largestRed == null && largestBlue != null){
+            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.BLUE, null, null, 0.0);
+        }
+        if ((largestRed != null && largestBlue == null)) {
+            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.RED, null, null, 0.0);
+        }
+        if ((largestRed == null && largestBlue == null)) {
+            return new Beacon.BeaconAnalysis();
+        }
+
+        // will get here only if both are not null.
+        if(largestRed.area() > largestBlue.area()){
+            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.RED, null, null, 0.0);
+        }
+
+        if(largestRed.area() < largestBlue.area()){
+            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.BLUE, null, null, 0.0);
+        }
+
+        return new Beacon.BeaconAnalysis();
+    }
 
     static Beacon.BeaconAnalysis analyze_REALTIME(List<Contour> contoursRed, List<Contour> contoursBlue,
                                                   Mat img, ScreenOrientation orientation, boolean debug) {
@@ -44,6 +77,27 @@ class BeaconAnalyzer {
         Contour largestRed = (largestIndexRed != -1) ? contoursRed.get(largestIndexRed) : null;
         Contour largestBlue = (largestIndexBlue != -1) ? contoursBlue.get(largestIndexBlue) : null;
 
+        if (largestRed == null && largestBlue != null){
+            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.BLUE, null, null, 0.0);
+        }
+        if ((largestRed != null && largestBlue == null)) {
+            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.RED, null, null, 0.0);
+        }
+        if ((largestRed == null && largestBlue == null)) {
+            return new Beacon.BeaconAnalysis();
+        }
+
+        // will get here only if both are not null.
+        if(largestRed.area() > largestBlue.area()){
+            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.RED, null, null, 0.0);
+        }
+
+        if(largestRed.area() < largestBlue.area()){
+            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.BLUE, null, null, 0.0);
+        }
+
+        return new Beacon.BeaconAnalysis();
+/*
         //If we don't have a main light for one of the colors, we know both colors are the same
         if (largestRed == null || largestBlue == null)
             return new Beacon.BeaconAnalysis();
@@ -143,6 +197,7 @@ class BeaconAnalyzer {
             return new Beacon.BeaconAnalysis(Beacon.BeaconColor.RED, Beacon.BeaconColor.BLUE, centerRect, confidence);
         else
             return new Beacon.BeaconAnalysis(Beacon.BeaconColor.BLUE, Beacon.BeaconColor.RED, centerRect, confidence);
+            */
     }
 
     static Beacon.BeaconAnalysis analyze_FAST(ColorBlobDetector detectorRed, ColorBlobDetector detectorBlue,

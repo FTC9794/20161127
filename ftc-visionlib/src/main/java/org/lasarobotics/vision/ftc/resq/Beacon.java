@@ -115,6 +115,10 @@ public final class Beacon {
                 blueDetector.process(img);
                 redDetector.process(img);
                 return BeaconAnalyzer.analyze_COMPLEX(redDetector.getContours(), blueDetector.getContours(), img, gray, orientation, this.bounds, this.debug);
+            case VVAnalysis:
+                blueDetector.process(img);
+                redDetector.process(img);
+                return BeaconAnalyzer.analyze_VVBeacon(redDetector.getContours(), blueDetector.getContours(), img, orientation, this.debug);
         }
     }
 
@@ -231,7 +235,11 @@ public final class Beacon {
          * COMPLEX is highly complex and a work in progress, but is better at selecting
          * the correct beacon at long distances, but requires that the entire beacon be in view.
          */
-        COMPLEX;
+        COMPLEX,
+        /*Analysis method for the new Velocity Vortex Beacons. Takes a picture and returns 1 color
+        on the left color
+         */
+        VVAnalysis;
 
         public String toString() {
             switch (this) {
