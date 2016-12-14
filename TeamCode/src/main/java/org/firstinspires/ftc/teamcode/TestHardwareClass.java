@@ -5,6 +5,7 @@ import com.qualcomm.hardware.adafruit.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsAnalogOpticalDistanceSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsDigitalTouchSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
 import org.firstinspires.ftc.robotcore.internal.AppUtil;
@@ -22,6 +23,7 @@ import java.io.File;
  * Created by ishaa on 12/13/2016.
  */
 
+@TeleOp(group = "Test", name = "Test Hardware")
 public class TestHardwareClass extends LinearVisionOpMode{
     BNO055IMU imu;
     ModernRoboticsAnalogOpticalDistanceSensor light;
