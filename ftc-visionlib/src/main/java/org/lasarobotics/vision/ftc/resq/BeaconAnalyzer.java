@@ -43,22 +43,25 @@ class BeaconAnalyzer {
         Contour largestRed = (largestIndexRed != -1) ? contoursRed.get(largestIndexRed) : null;
         Contour largestBlue = (largestIndexBlue != -1) ? contoursBlue.get(largestIndexBlue) : null;
 
+        // Red contour not detected
         if (largestRed == null && largestBlue != null){
             return new Beacon.BeaconAnalysis(Beacon.BeaconColor.BLUE, null, null, 0.0);
         }
+        // Blue contour not detected
         if ((largestRed != null && largestBlue == null)) {
             return new Beacon.BeaconAnalysis(Beacon.BeaconColor.RED, null, null, 0.0);
         }
+
         if ((largestRed == null && largestBlue == null)) {
             return new Beacon.BeaconAnalysis();
         }
 
         // will get here only if both are not null.
-        if(largestRed.area() > largestBlue.area()){
+        if(largestRed.area() > 2*largestBlue.area()){
             return new Beacon.BeaconAnalysis(Beacon.BeaconColor.RED, null, null, 0.0);
         }
 
-        if(largestRed.area() < largestBlue.area()){
+        if(largestRed.area()*2 < largestBlue.area()){
             return new Beacon.BeaconAnalysis(Beacon.BeaconColor.BLUE, null, null, 0.0);
         }
 

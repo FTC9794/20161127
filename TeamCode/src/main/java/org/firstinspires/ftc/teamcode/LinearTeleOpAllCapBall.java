@@ -48,10 +48,10 @@ public class LinearTeleOpAllCapBall extends LinearOpMode{
     double offset;
     double shootingSpeed = .325;
     double capBallIncrement = 0;
-    double leftBottomCapBallStart = 1.0;
-    double rightBottomCapBallStart = 0.0;
-    double leftCapBallOpenPosition = 0.3;
-    double rightCapBallOpenPosition = .7;
+    double leftBottomCapBallStart = 0.05;
+    double rightBottomCapBallStart = 0.95;
+    double leftCapBallOpenPosition = 0.7;
+    double rightCapBallOpenPosition = .3;
     @Override
     public void runOpMode() throws InterruptedException {
         rf = hardwareMap.dcMotor.get("right_front");
@@ -205,35 +205,38 @@ public class LinearTeleOpAllCapBall extends LinearOpMode{
             }
             if(gamepad2.dpad_left){
                 capBallIncrement+=.01;
+                if(capBallIncrement>1){
+                    capBallIncrement=1;
+                }
                 if(capBallIncrement + leftBottomCapBallStart>leftCapBallOpenPosition){
                     leftBottomCapBall.setPosition(leftCapBallOpenPosition);
                 }else{
-                    leftBottomCapBall.setPosition(leftBottomCapBallStart-capBallIncrement);
+                    leftBottomCapBall.setPosition(leftBottomCapBallStart+capBallIncrement);
                 }
-                if(capBallIncrement + rightBottomCapBallStart>leftCapBallOpenPosition){
+                if(rightBottomCapBallStart - capBallIncrement < rightCapBallOpenPosition){
                     rightBottomCapBall.setPosition(rightCapBallOpenPosition);
                 }else{
                     rightBottomCapBall.setPosition(rightBottomCapBallStart-capBallIncrement);
                 }
-                if(capBallIncrement>1){
-                    capBallIncrement=1;
-                }
+
             }
+            telemetry.addData("increment", capBallIncrement);
             if(gamepad2.dpad_right){
                 capBallIncrement-=.01;
-                if(capBallIncrement + leftBottomCapBallStart<leftBottomCapBallStart){
+                if(capBallIncrement<0){
+                    capBallIncrement=0;
+                }
+                if(leftBottomCapBallStart - capBallIncrement < leftBottomCapBallStart){
                     leftBottomCapBall.setPosition(leftBottomCapBallStart);
                 }else{
                     leftBottomCapBall.setPosition(leftBottomCapBallStart-capBallIncrement);
                 }
-                if(capBallIncrement + rightBottomCapBallStart<leftBottomCapBallStart){
+                if(capBallIncrement + rightBottomCapBallStart<rightBottomCapBallStart){
                     rightBottomCapBall.setPosition(rightBottomCapBallStart);
                 }else{
                     rightBottomCapBall.setPosition(rightBottomCapBallStart-capBallIncrement);
                 }
-                if(capBallIncrement<0){
-                    capBallIncrement=0;
-                }
+
             }
             telemetry.update();
         }

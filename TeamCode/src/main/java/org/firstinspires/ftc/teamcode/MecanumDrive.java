@@ -444,6 +444,19 @@ public class MecanumDrive {
     for smooth turns
     Method mostly for teleop
      */
+    public double averageEncoder(){
+        int motors = 4;
+        DcMotor[] motorList = {rf, rb, lf, lb};
+        double total = 0;
+        for(DcMotor motor:motorList){
+            if(motor.getPower()==0){
+                motors--;
+            }else{
+                total += motor.getCurrentPosition()/motor.getPower();
+            }
+        }
+        return total/motors;
+    }
     public int pivotSlide(double angle, double speed, boolean condition, double pivotAmount) {
 
         //return the new X and Y values using the angle needed and the speed the robot was
