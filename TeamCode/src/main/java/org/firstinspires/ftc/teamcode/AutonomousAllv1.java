@@ -55,6 +55,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
         start, timeDelay, slideState, getColor, pushBeacon, shooterWheel, triggerGate, stop, pivotRobot
     };
 
+    //Create State Machine Object
     stateMachine state;
 
     //dataloger
@@ -62,13 +63,18 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
     Date day = new Date();
 
+    //Intialize Counter Variables
     int noOfBeaconsPressed = 0;
     int seqCounter = 0;
 
+    //Create Drive Train Object
     MecanumDrive drive;
+
+    //Holds data for beacon color detection
     String rightOrLeft = "";
     String rightColor = "";
 
+    //Cap Ball Starting Servo Positions
     double leftBottomCapBallStart = 1.0;
     double rightBottomCapBallStart = 0.0;
 
@@ -78,6 +84,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     double shooterGateOpenTime = 1.0;
     double shooterWheelPower = 0.41;
 
+    //Max Encder Ticks Per Seconds for our Shooter Motor
     int shooterEncoderMax = 3080;
 
     // positions of the beacons' servo
@@ -92,7 +99,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     // Shooting distance from wall
     double shootingDistance = 50;
 
-    // Speeds
+    // Speeds with Corresponding Gains
     double highPower = .75;
     double highGain = 0.01;
 
@@ -105,19 +112,22 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     double allPower = 1;
     double allPowerGain = 0.01;
 
-    //We want to push the beacon when our robot is 10 cm away from the wall
+    //We want to push the beacon when our robot is 7 cm away from the wall
     double pushBeaconDistance = 7;
 
+    //Counters for verifying accuracy for beacon color detection
     int redCount = 0, blueCount = 0, blankCount = 0;
 
 
     public static double endGyro;
 
+    //Beacon Analysis Object
     Beacon.BeaconAnalysis beaconAnalysis;
     double imageConfidence;
 
     String autoProgram;
 
+    //Create Arrays for all 4 Autonomous Programs
     Object[][] sequenceArray;
 
     Object[][] blueFullArray = {
@@ -137,57 +147,31 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             // STEP 3. Move at a 45 degree angle until encoders are past -4100 at power 1
             // Robot is at 0 orientation (facing forward) )
 
-
-
-
+            //STEP 3. Move -4100 encoder counts at angle of 45 degrees at full power
             {stateMachine.slideState, 45, allPower, 2, -4100.0, 0.0, allPowerGain},
 
             // STEP 4. Move towards the wall until the ultrasonic sensor is 40 cm; orientation is 0
             {stateMachine.slideState, 90, allPower, 3, midPower, 0.01, 25.0, 0.0, highGain},
-            //{stateMachine.slideState, 50, allPower, 3, midPower, 0.01, 15.0, 0.0, highGain},
 
-            //{stateMachine.slideState, 90, allPower, 3, 40.0, 0.0, allPowerGain},
-            //{stateMachine.slideState, 50, allPower, 3, 20.0, 0.0, allPowerGain},
-
-            // STEP 5. Move forward fast to get near line encoder position -955
-            //{stateMachine.slideState, 0, highPower, 2, -700.0, 0.0, highGain},
-
-            // STEP 6. Move forward at slow speed until you see light sensor at Light Trigger
+            // STEP 5. Move forward at slow speed until you see light sensor at Light Trigger
             {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
 
-            // STEP 7. Move to position to get camera image
-            //{stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
-
-            //getColor State has 2 parameter,
-            //  1. which is the number of steps to skip if you don't resolve the color
-            //  2. Number of seconds to get the image
-
-            // STEP 8. Get the beacon colors
-            //{stateMachine.getColor, 1, 1},
-
-
-            // STEP 9. Slide back to the white line
-            //{stateMachine.slideState, 120, midPower, 6, whiteLightTrigger, 0.0, midGain},
-
-            // pushBeacon is either 1 for extend or 0 for retract must run the getColor state before this.
-            //
-
-            // STEP 10. Extend the beacon pusher
-            //{stateMachine.pushBeacon, 1, "blue"}, // 0 is retract, 1 is push
-
-            // STEP 11. Slide back to white line slowly if there was overshoot
-            //{stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
-
-
-            // STEP 12. Slide to wall until 12 cm to push the beacon.
-            // A new case in slideState to be able to skip if the beacon is not detected
+            //STEP 6. Get in position to read color
             {stateMachine.slideState, 0, lowPower, 2, -350.0, 0.0, lowGain},
+
+            //STEP 7. Read color
             {stateMachine.getColor},
-            //{stateMachine.slideState, 180, lowPower, 1, 280.0, 0.0, lowGain},
+
+            //STEP 8. Extend correct beacon pusher
             {stateMachine.pushBeacon, 1, "blue"}, // 0 is retract, 1 is push
+
+            //STEP 9. Line up to the beacon
             {stateMachine.slideState, 180, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+
+            //STEP 10. Slide to Beacon with Pusher Extended
             {stateMachine.slideState, 90, allPower, 3, midPower, 0.01, 7.0, 0.0, highGain},
 
+            //STOP FOR TESTING
             {stateMachine.stop},
 
 
