@@ -44,7 +44,8 @@ public class LinearTeleOpAll extends LinearOpMode{
     boolean shooterToggle;
     boolean harvestToggle;
     double offset;
-    double shootingSpeed = .325;
+    double shootingSpeed = 0.41;
+    int shootingMaxSpeedEncoder = 3080;
     @Override
     public void runOpMode() throws InterruptedException {
         rf = hardwareMap.dcMotor.get("right_front");
@@ -54,7 +55,7 @@ public class LinearTeleOpAll extends LinearOpMode{
         shooter = hardwareMap.dcMotor.get("shooter");
         sweeper = hardwareMap.dcMotor.get("sweeper");
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(6000);
+        shooter.setMaxSpeed(shootingMaxSpeedEncoder);
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         lf.setDirection(DcMotorSimple.Direction.REVERSE);
         lb.setDirection(DcMotorSimple.Direction.REVERSE);

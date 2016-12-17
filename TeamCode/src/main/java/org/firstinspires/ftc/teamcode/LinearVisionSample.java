@@ -4,6 +4,8 @@ package org.firstinspires.ftc.teamcode;
  * Created by Ishaan Oberoi on 12/15/2016.
  */
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
 import org.lasarobotics.vision.opmode.LinearVisionOpMode;
 
 
@@ -26,6 +28,7 @@ import org.opencv.core.Size;
  * version of the FTC Robot Controller app. Changes to the app may break the LinearVisionOpMode.
  * Should this happen, open up an issue on GitHub. :)
  */
+@Autonomous(name = "Beacon Color Test")
 public class LinearVisionSample extends LinearVisionOpMode {
 
     //Frame counter
@@ -139,6 +142,7 @@ public class LinearVisionSample extends LinearVisionOpMode {
                 frameCount++;
             }
 
+            telemetry.update();
         }
     }
 }

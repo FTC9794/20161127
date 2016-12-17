@@ -67,6 +67,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
     MecanumDrive drive;
     String rightOrLeft = "";
+    String rightColor = "";
 
     double leftBottomCapBallStart = 1.0;
     double rightBottomCapBallStart = 0.0;
@@ -75,7 +76,9 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     double shooterGateOpen = 0;
     double shooterGateClosed = 0.5;
     double shooterGateOpenTime = 1.0;
-    double shooterWheelPower = 0.31;
+    double shooterWheelPower = 0.41;
+
+    int shooterEncoderMax = 3080;
 
     // positions of the beacons' servo
     double leftBeaconRetract = 1;
@@ -103,7 +106,10 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     double allPowerGain = 0.01;
 
     //We want to push the beacon when our robot is 10 cm away from the wall
-    double pushBeaconDistance = 6;
+    double pushBeaconDistance = 7;
+
+    int redCount = 0, blueCount = 0, blankCount = 0;
+
 
     public static double endGyro;
 
@@ -130,43 +136,59 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             //      Gain for the angle correction
             // STEP 3. Move at a 45 degree angle until encoders are past -4100 at power 1
             // Robot is at 0 orientation (facing forward) )
+
+
+
+
             {stateMachine.slideState, 45, allPower, 2, -4100.0, 0.0, allPowerGain},
 
             // STEP 4. Move towards the wall until the ultrasonic sensor is 40 cm; orientation is 0
-            {stateMachine.slideState, 90, highPower, 3, 45.0, 0.0, highGain},
+            {stateMachine.slideState, 90, allPower, 3, midPower, 0.01, 25.0, 0.0, highGain},
+            //{stateMachine.slideState, 50, allPower, 3, midPower, 0.01, 15.0, 0.0, highGain},
+
+            //{stateMachine.slideState, 90, allPower, 3, 40.0, 0.0, allPowerGain},
+            //{stateMachine.slideState, 50, allPower, 3, 20.0, 0.0, allPowerGain},
 
             // STEP 5. Move forward fast to get near line encoder position -955
-            {stateMachine.slideState, 0, highPower, 2, -700.0, 0.0, highGain},
+            //{stateMachine.slideState, 0, highPower, 2, -700.0, 0.0, highGain},
 
             // STEP 6. Move forward at slow speed until you see light sensor at Light Trigger
             {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
 
             // STEP 7. Move to position to get camera image
-            {stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
+            //{stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
 
             //getColor State has 2 parameter,
             //  1. which is the number of steps to skip if you don't resolve the color
             //  2. Number of seconds to get the image
 
             // STEP 8. Get the beacon colors
-            {stateMachine.getColor, 1, 1},
+            //{stateMachine.getColor, 1, 1},
 
 
             // STEP 9. Slide back to the white line
-            {stateMachine.slideState, 120, midPower, 6, whiteLightTrigger, 0.0, midGain},
+            //{stateMachine.slideState, 120, midPower, 6, whiteLightTrigger, 0.0, midGain},
 
             // pushBeacon is either 1 for extend or 0 for retract must run the getColor state before this.
             //
+
             // STEP 10. Extend the beacon pusher
-            {stateMachine.pushBeacon, 1, "blue"}, // 0 is retract, 1 is push
+            //{stateMachine.pushBeacon, 1, "blue"}, // 0 is retract, 1 is push
 
             // STEP 11. Slide back to white line slowly if there was overshoot
-            {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+            //{stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
 
 
             // STEP 12. Slide to wall until 12 cm to push the beacon.
             // A new case in slideState to be able to skip if the beacon is not detected
-            {stateMachine.slideState, 90, highPower, 7, pushBeaconDistance, 0.0, midGain},
+            {stateMachine.slideState, 0, lowPower, 2, -350.0, 0.0, lowGain},
+            {stateMachine.getColor},
+            //{stateMachine.slideState, 180, lowPower, 1, 280.0, 0.0, lowGain},
+            {stateMachine.pushBeacon, 1, "blue"}, // 0 is retract, 1 is push
+            {stateMachine.slideState, 180, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+            {stateMachine.slideState, 90, allPower, 3, midPower, 0.01, 7.0, 0.0, highGain},
+
+            {stateMachine.stop},
 
 
             // STEP 13. Start wheel shooter
@@ -574,7 +596,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
         sweeper = hardwareMap.dcMotor.get("sweeper");
         shooter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setMaxSpeed(6000);
+        shooter.setMaxSpeed(shooterEncoderMax);
 
         Date day = new Date();
         data = new DataLogger(day.toString() + " light data");
@@ -682,34 +704,35 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     break;
 
                 case getColor:
-                    beaconAnalysis = beacon.getAnalysis();
-                    rightOrLeft = beaconAnalysis.getColorString();
-                    imageConfidence = beaconAnalysis.getConfidence();
+                    for(int i = 0; i < 8; i++) {
+                        beaconAnalysis = beacon.getAnalysis();
+                        if (beacon.getAnalysis().isRightRed()) {
+                            rightColor = "red";
+                            redCount ++;
 
-                    if(rightOrLeft.equals("???, ???")|| imageConfidence <.15){
-                        telemetry.addData("color", rightOrLeft);
-                        telemetry.addData("Confidence", imageConfidence);
-
-                        // If didn't get color or got with low confidence,
-                        // keep checking for 1 second. If more than 1s has elapsed
-                        // and haven't been able to determine colors, then skip # of states
-                        // passed as argument.
-                        if(timer.seconds() > 1){
-                            rightOrLeft = "???, ???";
-                            telemetry.addData("skip color", "");
-                            seqCounter += (int) sequenceArray[seqCounter][1];
-                            noOfBeaconsPressed++;
-                            timer.reset();
-                            break;
+                        } else if (beacon.getAnalysis().isRightBlue()) {
+                            rightColor = "blue";
+                            blueCount ++;
+                        }
+                        else{
+                            blankCount ++;
                         }
                     }
-                    else{
+
+                    if(redCount > 4 || blueCount > 4){
                         noOfBeaconsPressed++;
-                        telemetry.addData("goodImage ",rightOrLeft);
-                        telemetry.addData("goodImage ", imageConfidence);
+                        telemetry.addData("right color", rightColor);
                         timer.reset();
                         drive.resetEncoders();
                         seqCounter++;
+                    }  else{
+                        //LATER INSERT CODE FOR SKIPPING TO SHOOTING
+                        noOfBeaconsPressed++;
+                        telemetry.addData("right color", rightColor);
+                        timer.reset();
+                        drive.resetEncoders();
+                        seqCounter++;
+
                     }
                     break;
 
@@ -731,11 +754,11 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                             }
                         }
                         else if(((String)sequenceArray[seqCounter][2]).equals("blue")){
-                            if(rightOrLeft.equals("red, blue")){
+                            if(rightColor.equals("blue")){
                                 leftBeacon.setPosition(leftBeaconRetract);
                                 rightBeacon.setPosition(rightBeaconExtend);
                             }
-                            else if(rightOrLeft.equals("blue, red")){
+                            else if(rightColor.equals("red")){
                                 rightBeacon.setPosition(rightBeaconRetract);
                                 leftBeacon.setPosition(leftBeaconExtend);
                             } else{
@@ -790,14 +813,38 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                             }
                             break;
                         case 3: //goes while US level is greater than desired
-                            if(drive.slideAngleIMU(((Integer) sequenceArray[seqCounter][1]).doubleValue(), (double) sequenceArray[seqCounter][2], ultrasonic.cmUltrasonic() > (double)sequenceArray[seqCounter][4] , (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]) == 1){
+                            //Parameters: Angle, Max Power, Case, Min Power, gain, desired distance, orientation, oGain
+                            double currentDistance = ultrasonic.cmUltrasonic();
+                            double error = currentDistance - (double)sequenceArray[seqCounter][6];
+                            double speed = (double)sequenceArray[seqCounter][4] + (error * (double)sequenceArray[seqCounter][5]);
+                            if(speed > (double)sequenceArray[seqCounter][2]){
+                                speed = (double)sequenceArray[seqCounter][2];
+                            }
+                            else if(speed < (double)sequenceArray[seqCounter][4]){
+                                speed = (double)sequenceArray[seqCounter][4];
+                            }
+
+                            if(error > 0){
+                                drive.slideAngleIMU(((Integer) sequenceArray[seqCounter][1]).doubleValue(), speed, true, (double) sequenceArray[seqCounter][7], (double) sequenceArray[seqCounter][8]);
+                                telemetry.addData("current distance", currentDistance);
+                                telemetry.addData("error", error);
+                                telemetry.addData("state", "ultrasonic");
+                            }
+                            else{
+                                drive.setPowerAll(0, 0, 0, 0);
+                                timer.reset();
+                                drive.resetEncoders();
+                                seqCounter++;
+                            }
+
+                            /*if(drive.slideAngleIMU(((Integer) sequenceArray[seqCounter][1]).doubleValue(), (double) sequenceArray[seqCounter][2], ultrasonic.cmUltrasonic() > (double)sequenceArray[seqCounter][4] , (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]) == 1){
                                 telemetry.addData("state", ultrasonic.cmUltrasonic());
                             }
                             else{
                                 timer.reset();
                                 drive.resetEncoders();
                                 seqCounter++;
-                            }
+                            }*/
                             break;
 
                         case 4: //goes while US level is less than desired
@@ -835,8 +882,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                                 seqCounter++;
                             }
                             break;
-                        case 7: //goes while US level is greater than desired only if the
-                                //red blue is detected
+                        case 7: //INSERT Comments
                             if (rightOrLeft.equals("red, blue")|| rightOrLeft.equals("blue, red")) {
                                 if (drive.slideAngleIMU(((Integer) sequenceArray[seqCounter][1]).doubleValue(), (double) sequenceArray[seqCounter][2], ultrasonic.cmUltrasonic() > (double) sequenceArray[seqCounter][4], (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]) == 1) {
                                     telemetry.addData("state", ultrasonic.cmUltrasonic());
@@ -859,7 +905,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     timer.reset();
                     telemetry.addData("state", "stop");
                     telemetry.addData("US level", ultrasonic.cmUltrasonic());
-                    telemetry.addData("color", rightOrLeft);
+                    telemetry.addData("right color", rightColor);
                     break;
 
                 case shooterWheel:

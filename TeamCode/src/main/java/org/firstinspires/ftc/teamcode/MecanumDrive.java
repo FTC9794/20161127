@@ -514,6 +514,10 @@ public class MecanumDrive {
             return 0;
         }
     }
+
+
+
+
     double formatAngle(AngleUnit angleUnit, double angle) {
         return Double.parseDouble(formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle)));
     }
@@ -546,6 +550,9 @@ public class MecanumDrive {
             return 0;
         }
     }
+
+
+
 
     // returns how far the joystick is pushed in distance from the center
     // inputs are the X value and Y joystick value
