@@ -59,32 +59,10 @@ public class MecanumDrive {
     private double horizontal;
     private double angleChange;
     boolean notVisible = true;
-    private VuforiaLocalizer vuforia;
-    private VuforiaTrackables ftc;
-    private VuforiaTrackable gears;
-    private VuforiaTrackable tools;
-    private VuforiaTrackable wheels;
-    private VuforiaTrackable legos;
-    private List<VuforiaTrackable> allTrackables;
-    private VuforiaLocalizer.Parameters parameters;
-    public static final String TAG = "Vuforia Sample";
-
-    OpenGLMatrix lastLocation = null;
-    private double currentX;
-    private double currentY;
-    private double vuforiaAngle;
-    private double xDifference;
-    private double yDifference;
-    private double pivotdifference;
-    private double pitch;
-    private double roll;
-    private double yaw;
 
 
-    /**
-     * {@link #vuforia} is the variable we will use to store our instance of the Vuforia
-     * localization engine.
-     */
+
+
     /*
     Inputs:         The four motors
                     The compass sensor
@@ -97,6 +75,7 @@ public class MecanumDrive {
     Description:    Constructor for Mecanum drive object
      */
     public MecanumDrive(DcMotor rf, DcMotor rb, DcMotor lf, DcMotor lb, BNO055IMU imu, ModernRoboticsAnalogOpticalDistanceSensor light, ModernRoboticsI2cRangeSensor ultrasonic, ModernRoboticsI2cGyro gyro, Telemetry telemetry, ElapsedTime pivotTime) {
+        //Initialize motors sensors, and time
         this.rf = rf;
         this.rb = rb;
         this.lf = lf;
@@ -122,42 +101,7 @@ public class MecanumDrive {
                     Max speed and speed limit the range of speed. The power used is the gain times the difference
                     of the current angle vs the desired (0-doesn't move, 1- moves at full force)
      */
-    public int pivotToAngle(double angle, double gain, double time, double maxSpeed, double minSpeed) {
-        if (gyroCheck() == 0) {
-            setPowerAll(0, 0, 0, 0);
-        }
-        //set speeds until time is up
-        if (pivotTime.time() < time) {
-            //measure the gyro sensor
-            //get gyro sensor value
-            currentAngle = gyro.getIntegratedZValue();
 
-            //determine the new speed
-            angleDifference = currentAngle + angle;
-            newSpeed = -angleDifference * gain;
-
-            //set limits
-            if (newSpeed > maxSpeed) {
-                newSpeed = maxSpeed;
-            } else if (newSpeed < -maxSpeed) {
-                newSpeed = -maxSpeed;
-            }
-            if (newSpeed < minSpeed && newSpeed > 0) {
-                newSpeed = minSpeed;
-            } else if (newSpeed > -minSpeed && newSpeed < 0) {
-                newSpeed = -minSpeed;
-            }
-
-            //send back data about what the robot is doing
-
-            setPowerAll(newSpeed, newSpeed, -newSpeed, -newSpeed);
-            telemetry.addData("gyro angle", gyro.getIntegratedZValue());
-            telemetry.addData("angle diff", angleDifference);
-            return 1;
-        } else {
-            return 0;
-        }
-    }
     public int pivotToAngleIMU(double desiredAngle, double gain, boolean endCase, double maxSpeed, double minSpeed) {
         //set speeds until time is up
         if (endCase) {
@@ -218,62 +162,7 @@ public class MecanumDrive {
             return 0;
         }
     }
-/*
-    public int pivotToAngleIMU(double desiredAngle, double gain, boolean endCase, double maxSpeed, double minSpeed) {
-        if (endCase) {
-            //measure the gyro sensor
-            //get gyro sensor value
-            Orientation o = imu.getAngularOrientation();
-            double currentAngle = -o.firstAngle;
-            double difference = desiredAngle - currentAngle;
-            double magSpeed = 0.0;
 
-            double turnDirection = 1.0; // 1 is clockwise; -1 is counterclockwise
-
-            if (difference >0) {
-                // Desired angle is greater than current, turn clockwise
-                turnDirection = 1.0;
-            }
-
-            // if you need to turn more than 180 degrees, turn the opposite way
-            // set the magnitude of the speed to be proportional to the difference
-            // if you are more than 180 degrees away, you need to subtract the difference from 360
-            if (Math.abs(difference)>180){
-                turnDirection = -turnDirection;
-                magSpeed = (360-(Math.abs(difference)) * gain) ;
-            } else {
-                magSpeed = Math.abs(difference) * gain;
-            }
-
-
-            // never go above the max speed or below min speed
-
-            if(magSpeed > maxSpeed){
-                magSpeed = maxSpeed;
-            }
-            if(magSpeed<minSpeed){
-                magSpeed = minSpeed;
-            }
-
-            rf.setPower(magSpeed*turnDirection);
-            rb.setPower(magSpeed*turnDirection);
-            lf.setPower(-magSpeed*turnDirection);
-            lb.setPower(-magSpeed*turnDirection);
-
-
-            //send back data about what the robot is doing
-
-
-            telemetry.addData("Angle", currentAngle);
-            telemetry.addData("Mag speed", magSpeed);
-            telemetry.addData("Desired Angle", desiredAngle);
-            telemetry.addData("angle difference", currentAngle-desiredAngle);
-            return 1;
-        } else {
-            return 0;
-        }
-    }
-*/
     /*
     Inputs:         Speeds: Four doubles from -1 to 1 representing the speed of each motor (RF, RB, LF, LB)
                     Desired Light: The amount of reflected light the robot needs to follow (0 to 1)
@@ -283,26 +172,7 @@ public class MecanumDrive {
     Outputs:        Return of endCase: 0 makes the robot stop following the line
     Description:    This method follows a line
      */
-    public int followLine(double rfSpeed, double rbSpeed, double lfSpeed, double lbSpeed, double desiredLight, double gain, String leftOrRight, boolean endCase) {
-        if (endCase) {
-            angleChange = (light.getLightDetected() - desiredLight) * gain * 100;
-            if (leftOrRight.equals("left")) {
-                rf.setPower(rfSpeed + angleChange);
-                rb.setPower(rbSpeed + angleChange);
-                lf.setPower(lfSpeed - angleChange);
-                lb.setPower(lbSpeed - angleChange);
-            } else {
-                rf.setPower(rfSpeed - angleChange);
-                rb.setPower(rbSpeed - angleChange);
-                lf.setPower(lfSpeed + angleChange);
-                lb.setPower(lbSpeed + angleChange);
-            }
-            return 1;
-        } else {
-            setPowerAll(0, 0, 0, 0);
-            return 0;
-        }
-    }
+
 
     /*
     Inputs:         Speeds: Four doubles from -1 to 1 representing the speed of each motor (RF, RB, LF, LB)
@@ -311,15 +181,7 @@ public class MecanumDrive {
     Outputs:        Return 0 makes the robot stop and 1 keeps it going
     Description:    This method will move the robot until a certain light value has been detected
      */
-    public int goTillLight(double rfSpeed, double rbSpeed, double lfSpeed, double lbSpeed, int light) {
-        if (this.light.getLightDetected() < light) {
-            setPowerAll(rfSpeed, rbSpeed, lfSpeed, lbSpeed);
-            return 1;
-        } else {
-            setPowerAll(0, 0, 0, 0);
-            return 0;
-        }
-    }
+
 
     /*
     Inputs:         Sentinel which controls the execution of the loop (0 or 1)
@@ -347,56 +209,8 @@ public class MecanumDrive {
         lb.setPower(lbSpeed);
     }
 
-    /*
-    Inputs:         Four doubles from -1 to 1 representing the speed of each motor (RF, RB, LF, LB)
-                    Desired Distance: Int Distance from the wall in CM read by the ultrasonic sensors
-    Outputs:        Returns 1 to keep moving, or 0 to stop
-    Description:    This method sets power to all of the motors until ultrasonic sensor sees a certain value
-                    If no wall is visible to the ultrasonic sensor, its reading is 256
-     */
-    public int getToDistance(double rfSpeed, double rbSpeed, double lfSpeed, double lbSpeed, int desiredDistance) {
-
-        //get the average sensor value
-        wallReading = ultrasonic.cmUltrasonic();
 
 
-        if (wallReading <= 5) {
-            //bad ultrasonic reading
-            setPowerAll(0, 0, 0, 0);
-            return 0;
-        } else {
-
-            //move the distance
-            if (desiredDistance < ultrasonic.cmUltrasonic()) {
-                setPowerAll(rfSpeed, rbSpeed, lfSpeed, lbSpeed);
-                return 1;
-            } else if (desiredDistance > ultrasonic.cmUltrasonic()) {
-                setPowerAll(-rfSpeed, -rbSpeed, -lfSpeed, -lbSpeed);
-                return 1;
-            } else {
-                setPowerAll(0, 0, 0, 0);
-                return 0;
-            }
-        }
-
-    }
-
-    /*
-    Inputs:         Four doubles from -1 to 1 representing the speed of each motor (RF, RB, LF, LB)
-                    Time: Desired time in seconds you want to move
-    Outputs:        Returns 1 to keep moving, or 0 to stop
-    Description:    This method sets power to all of the motors until ultrasonic sensor sees a certain value
-                    This method moves the robot for time
-     */
-    public int moveForTime(double rfSpeed, double rbSpeed, double lfSpeed, double lbSpeed, double time) {
-        if (moveTime.seconds() < time) {
-            setPowerAll(rfSpeed, rbSpeed, lfSpeed, lbSpeed);
-            return 1;
-        } else {
-            setPowerAll(rfSpeed, rbSpeed, lfSpeed, lbSpeed);
-            return 0;
-        }
-    }
 
     /*
     Inputs:         Angle: Double for Desired Angle at which to slide the robot (in the frame of reference of the robot)
@@ -444,19 +258,7 @@ public class MecanumDrive {
     for smooth turns
     Method mostly for teleop
      */
-    public double averageEncoder(){
-        int motors = 4;
-        DcMotor[] motorList = {rf, rb, lf, lb};
-        double total = 0;
-        for(DcMotor motor:motorList){
-            if(motor.getPower()==0){
-                motors--;
-            }else{
-                total += motor.getCurrentPosition()/motor.getPower();
-            }
-        }
-        return total/motors;
-    }
+
     public int pivotSlide(double angle, double speed, boolean condition, double pivotAmount) {
 
         //return the new X and Y values using the angle needed and the speed the robot was
