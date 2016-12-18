@@ -108,7 +108,7 @@ public class MecanumDrive {
             //measure the gyro sensor
             //get gyro sensor value
             Orientation o = imu.getAngularOrientation();
-            double currentAngle = -o.firstAngle;
+            double currentAngle = -o.firstAngle; //Convert negative calculation to positive
             double difference = desiredAngle - currentAngle;
             if(difference>180){
                 difference-=360;
@@ -135,22 +135,6 @@ public class MecanumDrive {
                 lf.setPower(magSpeed);
                 lb.setPower(magSpeed);
             }
-/*
-            //determine the new speed
-            angleDifference = currentAngle - angle;
-            newSpeed = -angleDifference * gain;
-            //set limits
-            if (newSpeed > maxSpeed) {
-                newSpeed = maxSpeed;
-            } else if (newSpeed < -maxSpeed) {
-                newSpeed = -maxSpeed;
-            }
-            if (newSpeed < minSpeed && newSpeed > 0) {
-                newSpeed = minSpeed;
-            } else if (newSpeed > -minSpeed && newSpeed < 0) {
-                newSpeed = -minSpeed;
-            }
-*/
             //send back data about what the robot is doing
 
 
@@ -183,19 +167,6 @@ public class MecanumDrive {
      */
 
 
-    /*
-    Inputs:         Sentinel which controls the execution of the loop (0 or 1)
-    Outputs:        Returns 0 if gyro is unplugged or 1 if it is working
-    Description:    Checks if gyro is working
-     */
-    public int gyroCheck() {
-        int value = gyro.getHeading();
-        if (value == 361) {
-            return 0;
-        } else {
-            return 1;
-        }
-    }
 
     /*
     Inputs:         Four doubles from -1 to 1 representing the speed of each motor (RF, RB, LF, LB)
@@ -212,41 +183,6 @@ public class MecanumDrive {
 
 
 
-    /*
-    Inputs:         Angle: Double for Desired Angle at which to slide the robot (in the frame of reference of the robot)
-                    Speed: Power to apply to all the motors, double between -1 and 1
-                    Boolean Condition:  any case for which the robot does the action (case being sensor values etc.)
-    Outputs:        Returns 1 to keep moving, or 0 to stop
-    Description: This method slides the robot at a certain angle at a certain speed
-
-
-
-    The parameters are angle which is a double in the frame of reference of the robot
-    The robot will slide at the angle
-    Speed is a double between -1 and 1
-    Condition is a boolean which is when the method will return 0 and stop doing anything
-
-     */
-    public int slide(double angle, double speed, boolean condition) {
-
-        //return the new X and Y values using the angle needed and the speed the robot was
-        //traveling at
-        horizontal = round2D(calculateX(angle, speed));
-        vertical = round2D(calculateY(angle, speed));
-        telemetry.addData("vertical", vertical);
-        //determine the powers using the new X and Y values and the other joystick to pivot
-        if (condition) {
-            rf.setPower((vertical - horizontal) * .5);
-            rb.setPower((vertical + horizontal) * .5);
-            lf.setPower((vertical + horizontal) * .5);
-            lb.setPower((vertical - horizontal) * .5);
-            return 1;
-        } else {
-            setPowerAll(0, 0, 0, 0);
-            return 0;
-        }
-
-    }
 
     /*
     Pivot slide slides the robot at an angle while allowing it to pivot a certain amount
@@ -268,10 +204,10 @@ public class MecanumDrive {
 
         //determine the powers using the new X and Y values and the other joystick to pivot
         if (condition) {
-            rf.setPower((vertical - horizontal) + pivotAmount * .5);
-            rb.setPower((vertical + horizontal) + pivotAmount * .5);
-            lf.setPower((vertical + horizontal) - pivotAmount * .5);
-            lb.setPower((vertical - horizontal) - pivotAmount * .5);
+            rf.setPower(((vertical - horizontal) + pivotAmount) * .5);
+            rb.setPower(((vertical + horizontal) + pivotAmount) * .5);
+            lf.setPower(((vertical + horizontal) - pivotAmount) * .5);
+            lb.setPower(((vertical - horizontal) - pivotAmount) * .5);
             return 1;
         } else {
             setPowerAll(0, 0, 0, 0);
@@ -279,53 +215,15 @@ public class MecanumDrive {
         }
 
     }
-
-    /*
-    Slide angle is a method that makes the robot slide at an angle while keeping the same pivot angle so the robot will always face the same direction
-    The parameters are slideDirection in the frame of reference of the robot
-    The speed as a double between -1 and 1
-    the condition as a boolean which is when the program will end and return 0 when calling this command you may want to use conditions such as
-        Insert Examples
-    the orientation which is a double that is the direction the robot will face in the frame of reference of the gyro calibration position
-    the oGain which is a double between 0 and 1 which is how much gain for proportional feedback to correct for orientation
-     */
-    public int slideAngle(double slideDirection, double speed, boolean condition, double orientation, double oGain) {
-        // get the horizonal and vertical components of the robot speeds
-        // the horizonal and vertical are used to set the power of the motor
-
-        horizontal = round2D(calculateX(slideDirection, speed));
-        vertical = round2D(calculateY(slideDirection, speed));
-
-        // Get the gyro angle (WHAT ARE THE VALID RANGES?)
-        int gyroAngle = gyro.getIntegratedZValue();
-
-        // Correct for the orientation of the robot relative to the desired direction
-        // orientation is the desired angle want to slide
-        // correction is the error times the gain.
-
-        double pivotCorrection = -((orientation - gyroAngle) * oGain);
-
-        if (condition) {
-            rf.setPower(((vertical - horizontal) - pivotCorrection) * .5);
-            rb.setPower(((vertical + horizontal) - pivotCorrection) * .5);
-            lf.setPower(((vertical + horizontal) + pivotCorrection) * .5);
-            lb.setPower(((vertical - horizontal) + pivotCorrection) * .5);
-            return 1;
-        } else {
-            setPowerAll(0, 0, 0, 0);
-            return 0;
-        }
-    }
-
-
-
-
+    //Convert IMU reading to value between -infinity and infinity
     double formatAngle(AngleUnit angleUnit, double angle) {
         return Double.parseDouble(formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle)));
     }
     String formatDegrees(double degrees){
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
+
+
     public int slideAngleIMU(double slideDirection, double speed, boolean condition, double orientation, double oGain) {
 
         // get the horizonal and vertical components of the robot speeds
@@ -335,17 +233,17 @@ public class MecanumDrive {
 
         Orientation o = imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
         double ox = formatAngle(o.angleUnit, o.firstAngle);
-        double gyroAngle = -ox;
+        double IMUAngle = -ox;
 
         // What is the range of the gyroAngle?
-        double pivotCorrection = -((orientation - gyroAngle) * oGain);
+        double pivotCorrection = -((orientation - IMUAngle) * oGain);
         //determine the powers using the new X and Y values and the other joystick to pivot
         if (condition) {
             rf.setPower(((vertical - horizontal) + pivotCorrection) * .5);
             rb.setPower(((vertical + horizontal) + pivotCorrection) * .5);
             lf.setPower(((vertical + horizontal) - pivotCorrection) * .5);
             lb.setPower(((vertical - horizontal) - pivotCorrection) * .5);
-            telemetry.addData("gyro angle", gyroAngle);
+            telemetry.addData("IMU angle", IMUAngle);
             return 1;
         } else {
             setPowerAll(0, 0, 0, 0);

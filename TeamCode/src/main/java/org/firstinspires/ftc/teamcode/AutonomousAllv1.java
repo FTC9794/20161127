@@ -118,11 +118,12 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     double allPower = 1;
     double allPowerGain = 0.01;
 
-    //We want to push the beacon when our robot is 7 cm away from the wall
-    double pushBeaconDistance = 7;
 
     //Counters for verifying accuracy for beacon color detection
     int redCount = 0, blueCount = 0, blankCount = 0;
+
+    //Starting delay
+    int autoStartDelay = 0;
 
 
     public static double endGyro;
@@ -140,7 +141,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.start},
 
             //STEP 2. Add a delay in seconds if needed
-            {stateMachine.timeDelay, 0},
+            {stateMachine.timeDelay, autoStartDelay},
 
             // Slide State Parameters
             //      Angle -- Angle at which you slide
