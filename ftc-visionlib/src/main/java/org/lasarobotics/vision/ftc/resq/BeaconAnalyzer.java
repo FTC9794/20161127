@@ -45,11 +45,11 @@ class BeaconAnalyzer {
 
         // Red contour not detected
         if (largestRed == null && largestBlue != null){
-            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.BLUE, null, null, 0.0);
+            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.BLUE, Beacon.BeaconColor.BLUE, null, 0.0);
         }
         // Blue contour not detected
         if ((largestRed != null && largestBlue == null)) {
-            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.RED, null, null, 0.0);
+            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.RED, Beacon.BeaconColor.BLUE, null, 0.0);
         }
 
         if ((largestRed == null && largestBlue == null)) {
@@ -58,11 +58,11 @@ class BeaconAnalyzer {
 
         // will get here only if both are not null.
         if(largestRed.area() > 2*largestBlue.area()){
-            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.RED, null, null, 0.0);
+            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.RED, Beacon.BeaconColor.RED, null, 0.0);
         }
 
         if(largestRed.area()*2 < largestBlue.area()){
-            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.BLUE, null, null, 0.0);
+            return new Beacon.BeaconAnalysis(Beacon.BeaconColor.BLUE, Beacon.BeaconColor.BLUE, null, 0.0);
         }
 
         return new Beacon.BeaconAnalysis();

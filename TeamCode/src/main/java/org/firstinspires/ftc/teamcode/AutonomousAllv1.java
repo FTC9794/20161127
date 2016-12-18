@@ -22,6 +22,7 @@ import org.lasarobotics.vision.ftc.resq.Beacon;
 import org.lasarobotics.vision.opmode.LinearVisionOpMode;
 import org.lasarobotics.vision.opmode.extensions.CameraControlExtension;
 import org.lasarobotics.vision.util.ScreenOrientation;
+import org.opencv.core.Mat;
 import org.opencv.core.Size;
 
 import java.io.File;
@@ -34,6 +35,8 @@ import java.util.Locale;
 
 @Autonomous(group = "auto", name = "Auto All")
 public class AutonomousAllv1 extends LinearVisionOpMode {
+
+    int frameCount = 0;
 
     // DC motors
     DcMotor lf, lb, rf, rb, shooter, sweeper;
@@ -87,6 +90,9 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     //Max Encder Ticks Per Seconds for our Shooter Motor
     int shooterEncoderMax = 3080;
 
+    //Counts Per Inch
+    double countsPerInch = 119.4;
+
     // positions of the beacons' servo
     double leftBeaconRetract = 1;
     double leftBeaconExtend = 0;
@@ -137,6 +143,13 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             //STEP 2. Add a delay in seconds if needed
             {stateMachine.timeDelay, 0},
 
+            /*{stateMachine.slideState, 0, lowPower, 1, 48.0, 0.0, lowGain, highPower, lowPower, 0.00004},
+            {stateMachine.slideState, 180, lowPower, 1, 24.0, 0.0, lowGain, highPower, lowPower, 0.00004},
+            {stateMachine.slideState, 90, allPower, 1, 24.0, 0.0, lowGain, allPower, midPower, 0.00004},
+            {stateMachine.slideState, -90, allPower, 1, 24.0, 0.0, lowGain, allPower, midPower, 0.00004},
+
+            {stateMachine.stop},
+*/
             // Slide State Parameters
             //      Angle -- Angle at which you slide
             //      Power -- power for the motors
@@ -148,29 +161,36 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             // Robot is at 0 orientation (facing forward) )
 
             //STEP 3. Move -4100 encoder counts at angle of 45 degrees at full power
-            {stateMachine.slideState, 45, allPower, 2, -4100.0, 0.0, allPowerGain},
+
+
+
+
+
+            {stateMachine.slideState, 45, allPower, 1, 36.0, 0.0, allPowerGain, allPower, lowPower, 1.0},
+
 
             // STEP 4. Move towards the wall until the ultrasonic sensor is 25 cm; orientation is 0
             {stateMachine.slideState, 90, allPower, 3, midPower, 0.01, 25.0, 0.0, highGain},
+            {stateMachine.slideState, 45, allPower, 3, midPower, 0.01, 15.0, 0.0, midGain},
 
             // STEP 5. Move forward at slow speed until you see light sensor at Light Trigger
             {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
 
             //STEP 6. Get in position to read color
-            {stateMachine.slideState, 0, lowPower, 2, -350.0, 0.0, lowGain},
+            {stateMachine.slideState, 0, midPower, 1, 2.0, 0.0, midGain, midPower, lowPower, 0.00004},
 
             //STEP 7. Read color
             {stateMachine.getColor},
 
+            //STEP 9. Line up to the beacon
+            {stateMachine.slideState, 180, lowPower, 1, 2.0, 0.0, midGain, midPower, lowPower, 0.00004},
+
             //STEP 8. Extend correct beacon pusher
             {stateMachine.pushBeacon, 1, "blue"}, // 0 is retract, 1 is push
-
-            //STEP 9. Line up to the beacon
-            {stateMachine.slideState, 180, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+            //{stateMachine.timeDelay, 1},
 
             //STEP 10. Slide to Beacon with Pusher Extended
-            {stateMachine.slideState, 85, allPower, 3, midPower, 0.01, 7.0, 0.0, highGain},
-
+            {stateMachine.slideState, 90, allPower, 3, midPower, 0.01, 7.0, 0.0, highGain},
 
             // STEP 13. Start wheel shooter
             {stateMachine.shooterWheel, shooterWheelPower},
@@ -189,72 +209,39 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.triggerGate, shooterGateOpenTime},
 
             {stateMachine.shooterWheel, 0.0},
+            {stateMachine.slideState, 50, allPower, 3, highPower, 0.01, 15.0, 0.0, highGain},
+            {stateMachine.slideState, 0, midPower, 1, 18.0, 0.0, midGain, allPower, allPower, 0.00004},
 
-            {stateMachine.slideState, 50, allPower, 3, midPower, 0.01, 25.0, 0.0, highGain},
 
-            {stateMachine.slideState, 0, midPower, 6, whiteLightTrigger, 0.0, midGain},
+
+            {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
 
             //STEP 6. Get in position to read color
-            {stateMachine.slideState, 0, lowPower, 2, -350.0, 0.0, lowGain},
+            {stateMachine.slideState, 0, midPower, 1, 2.0, 0.0, midGain, midPower, lowPower, 0.00004},
 
             //STEP 7. Read color
             {stateMachine.getColor},
 
+            //STEP 9. Line up to the beacon
+            {stateMachine.slideState, 180, lowPower, 1, 2.0, 0.0, midGain, midPower, lowPower, 0.00004},
+
             //STEP 8. Extend correct beacon pusher
             {stateMachine.pushBeacon, 1, "blue"}, // 0 is retract, 1 is push
-
-            //STEP 9. Line up to the beacon
-            {stateMachine.slideState, 180, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+            //{stateMachine.timeDelay, 1},
 
             //STEP 10. Slide to Beacon with Pusher Extended
-            {stateMachine.slideState, 85, allPower, 3, midPower, 0.01, 7.0, 0.0, highGain},
-
+            {stateMachine.slideState, 90, allPower, 3, midPower, 0.01, 7.0, 0.0, highGain},
             // STEP 30. Back off wall
             {stateMachine.slideState, -90, highPower, 4, 35.0, 0.0, highGain},
 
             // STEP 31. Retract beacon pusher
             {stateMachine.pushBeacon, 0, "blue"},
-
+            {stateMachine.pivotRobot, 30.0, 0.01, 1, highPower, lowPower/3},
+            {stateMachine.slideState, 180, null, 1, 44.0, 45.0, allPowerGain, allPower, allPower, 0.00004},
+            {stateMachine.stop},
             // STEP 32. slide to cap ball
             {stateMachine.slideState, -135, allPower, 5, 3.0, 0.0, allPowerGain},
             //STOP FOR TESTING
-            {stateMachine.stop},
-
-            // STEP 21 Move forward to second line at speed .75
-            {stateMachine.slideState, 0, highPower, 2, -2784.96, 0.0, highGain},
-
-            // STEP 22 Move sideways slowly to 40 cm from wall
-            {stateMachine.slideState, 90, highPower, 3, 45.0, 0.0, highGain},
-
-            // STEP 23 Move slowly to line
-            {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
-
-            // STEP 24  Move to the camera position
-            {stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
-
-            // STEP 25. Get the beacon colors
-            {stateMachine.getColor, 1, 1},
-
-            // STEP 26. Slide back to the white line
-            {stateMachine.slideState, 120, midPower, 6, whiteLightTrigger, 0.0, midGain},
-
-            // STEP 27. Extend the beac0n pusher
-            {stateMachine.pushBeacon, 1, "blue"}, // 0 is retract, 1 is push
-
-            // STEP 28. Slide back to white line slowly if there was overshoot
-            {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
-
-            // STEP 29. Slide to wall until 12 cm to push the beacon.
-            {stateMachine.slideState, 90, highPower, 7, pushBeaconDistance, 0.0, highGain},
-
-            // STEP 30. Back off wall
-            {stateMachine.slideState, -90, highPower, 4, 35.0, 0.0, highGain},
-
-            // STEP 31. Retract beacon pusher
-            {stateMachine.pushBeacon, 0, "blue"},
-
-            // STEP 32. slide to cap ball
-            {stateMachine.slideState, -135, allPower, 5, 3.0, 0.0, allPowerGain},
             {stateMachine.stop},
     };
 
@@ -475,6 +462,12 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     public int average4Motors(int a, int b, int c, int d) {
         return (int) (a + b + c + d) / 4;
     }
+    public double averageEncoders(){
+        double encoderA = (lf.getCurrentPosition() + rb.getCurrentPosition()) / 2;
+        double encoderB = (rf.getCurrentPosition() + lb.getCurrentPosition()) / 2;
+        double encoderAverage = (Math.abs(encoderA) + Math.abs(encoderB)) / 2;
+        return encoderAverage;
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -485,19 +478,6 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
         telemetry.addData("Init", "vision started");
         telemetry.update();
 
-        /**
-         * Set the camera used for detection
-         * PRIMARY = Front-facing, larger camera
-         * SECONDARY = Screen-facing, "selfie" camera :D
-         **/
-        this.setCamera(Cameras.PRIMARY);
-
-        /**
-         * Set the frame size
-         * Larger = sometimes more accurate, but also much slower
-         * After this method runs, it will set the "width" and "height" of the frame
-         **/
-        this.setFrameSize(new Size(900, 900));
 
         /**
          * Enable extensions. Use what you need.
@@ -511,7 +491,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
          * Set the beacon analysis method
          * Try them all and see what works!
          */
-        beacon.setAnalysisMethod(Beacon.AnalysisMethod.FAST);
+        beacon.setAnalysisMethod(Beacon.AnalysisMethod.VVAnalysis);
 
         /**
          * Set color tolerances
@@ -556,6 +536,8 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
          */
         cameraControl.setColorTemperature(CameraControlExtension.ColorTemperature.AUTO);
         cameraControl.setAutoExposureCompensation();
+
+
 
         telemetry.addData("Init", "Open CV setup");
         telemetry.update();
@@ -715,35 +697,53 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     break;
 
                 case getColor:
-                    for(int i = 0; i < 20; i++) {
-                        beaconAnalysis = beacon.getAnalysis();
-                        if (beacon.getAnalysis().isRightRed()) {
-                            rightColor = "red";
-                            redCount ++;
+                    beaconAnalysis = beacon.getAnalysis();
+                    if (beacon.getAnalysis().isRightRed()) {
+                        rightColor = "red";
+                        redCount ++;
 
-                        } else if (beacon.getAnalysis().isRightBlue()) {
-                            rightColor = "blue";
-                            blueCount ++;
-                        }
-                        else{
-                            blankCount ++;
-                        }
+                    } else if (beacon.getAnalysis().isRightBlue()) {
+                        rightColor = "blue";
+                        blueCount ++;
+                    }
+                    else{
+                        blankCount ++;
                     }
 
-                    if(redCount > 12 || blueCount > 12){
+
+                    if(redCount > 20 || blueCount > 20){
                         noOfBeaconsPressed++;
+
                         telemetry.addData("right color", rightColor);
+                        telemetry.addData("blue count", blueCount);
+                        telemetry.addData("red count", redCount);
+                        telemetry.addData("blank count", blankCount);
+                        data.addField(blueCount);
+                        data.addField(redCount);
+                        data.addField(blankCount);
+                        data.newLine();
+                        redCount = 0;
+                        blueCount = 0;
+                        blankCount = 0;
                         timer.reset();
                         drive.resetEncoders();
                         seqCounter++;
-                    }  else{
-                        //LATER INSERT CODE FOR SKIPPING TO SHOOTING
+                    } else if (blankCount > 50){
                         noOfBeaconsPressed++;
+                        redCount = 0;
+                        blueCount = 0;
+                        blankCount = 0;
+                        data.addField(blueCount);
+                        data.addField(redCount);
+                        data.addField(blankCount);
+                        data.newLine();
                         telemetry.addData("right color", rightColor);
+                        telemetry.addData("blue count", blueCount);
+                        telemetry.addData("blue count", redCount);
+                        telemetry.addData("blue count", blankCount);
                         timer.reset();
                         drive.resetEncoders();
                         seqCounter+=4;
-
                     }
                     break;
 
@@ -794,12 +794,22 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     //if (drive.slideAngle(((Integer) sequenceArray[counter][1]).doubleValue(), (double) sequenceArray[counter][2], ((Boolean) sequenceArray[counter][3]).booleanValue(), (double) sequenceArray[counter][4], (double) sequenceArray[counter][5]) == 1) {
                     switch ((int)sequenceArray[seqCounter][3]) {
                         case 1: //goes while encoder count is less than desired. next parameter is the desired encoder count.
-                            double encoderAverage = average4Motors(rf.getCurrentPosition(), rb.getCurrentPosition(), lf.getCurrentPosition(), lb.getCurrentPosition());
-                            if(drive.slideAngleIMU((int) sequenceArray[seqCounter][1], (double) sequenceArray[seqCounter][2], encoderAverage < (double)sequenceArray[seqCounter][4], (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]) == 1){
-                                telemetry.addData("state", encoderAverage);
+                            //double encoderAverage = average4Motors(rf.getCurrentPosition(), rb.getCurrentPosition(), lf.getCurrentPosition(), lb.getCurrentPosition());
+                            double encoderAverage = averageEncoders();
+                            double encoderError = ((double)sequenceArray[seqCounter][4] * countsPerInch) - encoderAverage;
+                            double encoderSpeed = (encoderError * (double)sequenceArray[seqCounter][9]) + (double)sequenceArray[seqCounter][8];
+                            if(encoderSpeed > (double)sequenceArray[seqCounter][7]){
+                                encoderSpeed = (double)sequenceArray[seqCounter][7];
+                            }
+                            else if(encoderSpeed < (double)sequenceArray[seqCounter][8]){
+                                encoderSpeed = (double)sequenceArray[seqCounter][8];
+                            }
 
+                            if(encoderError > 0){
+                                drive.slideAngleIMU((int) sequenceArray[seqCounter][1], encoderSpeed, true, (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]);
                             }
                             else{
+                                drive.setPowerAll(0, 0, 0, 0);
                                 timer.reset();
                                 drive.resetEncoders();
                                 seqCounter ++;
@@ -811,10 +821,10 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                             if(drive.slideAngleIMU(((Integer) sequenceArray[seqCounter][1]).doubleValue(), (double) sequenceArray[seqCounter][2], backEncoder > (double)sequenceArray[seqCounter][4], (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]) == 1){
                                 telemetry.addData("state", "slide encoder ");
                                 telemetry.addData("Encoder average", backEncoder);
-                                data.addField(rf.getCurrentPosition());
-                                data.addField(rb.getCurrentPosition());
-                                data.addField(lf.getCurrentPosition());
-                                data.addField(lb.getCurrentPosition());
+                                //data.addField(rf.getCurrentPosition());
+                               // data.addField(rb.getCurrentPosition());
+                               // data.addField(lf.getCurrentPosition());
+                                //data.addField(lb.getCurrentPosition());
                                 data.newLine();
                             }
                             else{
@@ -953,6 +963,18 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             }
             telemetry.addData("color", rightOrLeft);
             telemetry.update();
+            if (hasNewFrame()) {
+                //Get the frame
+                Mat rgba = getFrameRgba();
+                Mat gray = getFrameGray();
+
+                //Discard the current frame to allow for the next one to render
+                discardFrame();
+
+                //Do all of your custom frame processing here
+                //For this demo, let's just add to a frame counter
+                frameCount++;
+            }
         }
 
     }

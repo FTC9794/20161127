@@ -533,16 +533,16 @@ public class MecanumDrive {
 
         Orientation o = imu.getAngularOrientation().toAxesReference(AxesReference.INTRINSIC).toAxesOrder(AxesOrder.ZYX);
         double ox = formatAngle(o.angleUnit, o.firstAngle);
-        double gyroAngle = ox;
+        double gyroAngle = -ox;
 
         // What is the range of the gyroAngle?
         double pivotCorrection = -((orientation - gyroAngle) * oGain);
         //determine the powers using the new X and Y values and the other joystick to pivot
         if (condition) {
-            rf.setPower(((vertical - horizontal) - pivotCorrection) * .5);
-            rb.setPower(((vertical + horizontal) - pivotCorrection) * .5);
-            lf.setPower(((vertical + horizontal) + pivotCorrection) * .5);
-            lb.setPower(((vertical - horizontal) + pivotCorrection) * .5);
+            rf.setPower(((vertical - horizontal) + pivotCorrection) * .5);
+            rb.setPower(((vertical + horizontal) + pivotCorrection) * .5);
+            lf.setPower(((vertical + horizontal) - pivotCorrection) * .5);
+            lb.setPower(((vertical - horizontal) - pivotCorrection) * .5);
             telemetry.addData("gyro angle", gyroAngle);
             return 1;
         } else {
