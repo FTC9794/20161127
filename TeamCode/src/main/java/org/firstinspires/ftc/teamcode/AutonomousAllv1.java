@@ -129,7 +129,6 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
     //Beacon Analysis Object
     Beacon.BeaconAnalysis beaconAnalysis;
-    double imageConfidence;
 
     String autoProgram;
 
@@ -143,13 +142,6 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             //STEP 2. Add a delay in seconds if needed
             {stateMachine.timeDelay, 0},
 
-            /*{stateMachine.slideState, 0, lowPower, 1, 48.0, 0.0, lowGain, highPower, lowPower, 0.00004},
-            {stateMachine.slideState, 180, lowPower, 1, 24.0, 0.0, lowGain, highPower, lowPower, 0.00004},
-            {stateMachine.slideState, 90, allPower, 1, 24.0, 0.0, lowGain, allPower, midPower, 0.00004},
-            {stateMachine.slideState, -90, allPower, 1, 24.0, 0.0, lowGain, allPower, midPower, 0.00004},
-
-            {stateMachine.stop},
-*/
             // Slide State Parameters
             //      Angle -- Angle at which you slide
             //      Power -- power for the motors
@@ -160,16 +152,11 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             // STEP 3. Move at a 45 degree angle until encoders are past -4100 at power 1
             // Robot is at 0 orientation (facing forward) )
 
-            //STEP 3. Move -4100 encoder counts at angle of 45 degrees at full power
-
-
-
-
-
+            //STEP 3. Move 36 inches at angle of 45 degrees at full power
             {stateMachine.slideState, 45, allPower, 1, 36.0, 0.0, allPowerGain, allPower, lowPower, 1.0},
 
 
-            // STEP 4. Move towards the wall until the ultrasonic sensor is 25 cm; orientation is 0
+            // STEP 4. Move towards the wall until the ultrasonic sensor is 25 cm, and then 15 cm; orientation is 0
             {stateMachine.slideState, 90, allPower, 3, midPower, 0.01, 25.0, 0.0, highGain},
             {stateMachine.slideState, 45, allPower, 3, midPower, 0.01, 15.0, 0.0, midGain},
 
@@ -182,66 +169,62 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             //STEP 7. Read color
             {stateMachine.getColor},
 
-            //STEP 9. Line up to the beacon
+            //STEP 8. Line up to the beacon
             {stateMachine.slideState, 180, lowPower, 1, 2.0, 0.0, midGain, midPower, lowPower, 0.00004},
 
-            //STEP 8. Extend correct beacon pusher
+            //STEP 9. Extend correct beacon pusher
             {stateMachine.pushBeacon, 1, "blue"}, // 0 is retract, 1 is push
-            //{stateMachine.timeDelay, 1},
 
             //STEP 10. Slide to Beacon with Pusher Extended
             {stateMachine.slideState, 90, allPower, 3, midPower, 0.01, 7.0, 0.0, highGain},
 
-            // STEP 13. Start wheel shooter
+            // STEP 11. Start wheel shooter
             {stateMachine.shooterWheel, shooterWheelPower},
 
-            // STEP 14. Back off the wall to the shooting distance from the wall
+            // STEP 12. Back off the wall to the shooting distance from the wall
             {stateMachine.slideState, -90, highPower, 4, shootingDistance, 0.0, highGain},
 
-
-            // STEP 15. Retract beacon pusher
+            // STEP 13. Retract beacon pusher
             {stateMachine.pushBeacon, 0, "blue"}, // retracts beacon
 
-            // STEP 16. Move forward to shooting position
-            //{stateMachine.slideState, 0, midPower, 2, -290.0, 0.0, midGain},
-
-            // STEPS 17-20. Shoot 1st particle, wait 1 sec, Shoot 2nd particle, stop shooter
+            // STEPS 14-17. Shoot 1st particle, wait 1 sec, Shoot 2nd particle, stop shooter
             {stateMachine.triggerGate, shooterGateOpenTime},
 
             {stateMachine.shooterWheel, 0.0},
             {stateMachine.slideState, 50, allPower, 3, highPower, 0.01, 15.0, 0.0, highGain},
             {stateMachine.slideState, 0, midPower, 1, 18.0, 0.0, midGain, allPower, allPower, 0.00004},
 
-
-
+            //STEP 18. Slide to second white line at low speed
             {stateMachine.slideState, 0, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
 
-            //STEP 6. Get in position to read color
+            //STEP 19. Get in position to read color
             {stateMachine.slideState, 0, midPower, 1, 2.0, 0.0, midGain, midPower, lowPower, 0.00004},
 
-            //STEP 7. Read color
+            //STEP 20. Read color
             {stateMachine.getColor},
 
-            //STEP 9. Line up to the beacon
+            //STEP 21. Line up to the beacon
             {stateMachine.slideState, 180, lowPower, 1, 2.0, 0.0, midGain, midPower, lowPower, 0.00004},
 
-            //STEP 8. Extend correct beacon pusher
+            //STEP 22. Extend correct beacon pusher
             {stateMachine.pushBeacon, 1, "blue"}, // 0 is retract, 1 is push
-            //{stateMachine.timeDelay, 1},
 
-            //STEP 10. Slide to Beacon with Pusher Extended
+            //STEP 23. Slide to Beacon with Pusher Extended
             {stateMachine.slideState, 90, allPower, 3, midPower, 0.01, 7.0, 0.0, highGain},
-            // STEP 30. Back off wall
+
+            // STEP 24. Back off wall
             {stateMachine.slideState, -90, highPower, 4, 35.0, 0.0, highGain},
 
-            // STEP 31. Retract beacon pusher
+            // STEP 25. Retract beacon pusher
             {stateMachine.pushBeacon, 0, "blue"},
+
+            //STEP 26. Pivot robot to 45 degrees
             {stateMachine.pivotRobot, 30.0, 0.01, 1, highPower, lowPower/3},
+
+            //STEP 27. Drive at full power to cap ball to push it and park
             {stateMachine.slideState, 180, null, 1, 44.0, 45.0, allPowerGain, allPower, allPower, 0.00004},
-            {stateMachine.stop},
-            // STEP 32. slide to cap ball
-            {stateMachine.slideState, -135, allPower, 5, 3.0, 0.0, allPowerGain},
-            //STOP FOR TESTING
+
+            //STEP 28. Stop robot
             {stateMachine.stop},
     };
 
@@ -645,7 +628,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
         telemetry.update();
         boolean selected = false;
 
-        //Use gamepad inputs to choose whih program will run
+        //Use gamepad inputs to choose which program will run
         while(!selected){
             if(gamepad1.x){
                 telemetry.addData("Program selected", "Blue Full Autonomous");
@@ -684,6 +667,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     timer.reset();
                     break;
 
+                //Starting Delay. Waits for time in seconds before starting the autonomous program
                 case timeDelay:
                     if (timer.seconds() < (int) sequenceArray[seqCounter][1]) {
 
@@ -696,32 +680,35 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     telemetry.addData("time", timer.seconds());
                     break;
 
+                //Reads the color of the right side of the beacon
                 case getColor:
                     beaconAnalysis = beacon.getAnalysis();
-                    if (beacon.getAnalysis().isRightRed()) {
+                    if (beacon.getAnalysis().isRightRed()) { //Cheks to see if red
                         rightColor = "red";
                         redCount ++;
 
-                    } else if (beacon.getAnalysis().isRightBlue()) {
+                    } else if (beacon.getAnalysis().isRightBlue()) { //Checks to see if blue
                         rightColor = "blue";
                         blueCount ++;
                     }
-                    else{
+                    else{ //Checks to see if no color was found
                         blankCount ++;
                     }
 
 
-                    if(redCount > 20 || blueCount > 20){
+                    if(redCount > 20 || blueCount > 20){ //Verifies that correct color was chosen
                         noOfBeaconsPressed++;
 
                         telemetry.addData("right color", rightColor);
                         telemetry.addData("blue count", blueCount);
                         telemetry.addData("red count", redCount);
                         telemetry.addData("blank count", blankCount);
+                        //Write data to the Excel Spreadsheet
                         data.addField(blueCount);
                         data.addField(redCount);
                         data.addField(blankCount);
                         data.newLine();
+                        //Reset counters and timers
                         redCount = 0;
                         blueCount = 0;
                         blankCount = 0;
@@ -730,9 +717,11 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                         seqCounter++;
                     } else if (blankCount > 50){
                         noOfBeaconsPressed++;
+                        //reset counters
                         redCount = 0;
                         blueCount = 0;
                         blankCount = 0;
+                        //Write data to excel spreadsheet
                         data.addField(blueCount);
                         data.addField(redCount);
                         data.addField(blankCount);
@@ -747,6 +736,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     }
                     break;
 
+                //Determines which beacon pusher to extend, based on alliance and the color readings
                 case pushBeacon:
                     // push for 1. retract for any other value.
                     telemetry.addData("color", rightOrLeft);
@@ -790,22 +780,21 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     timer.reset();
                     break;
 
+                //State for moving the robot. Contains 8 different case for 8 different cases to check while sliding
                 case slideState:
-                    //if (drive.slideAngle(((Integer) sequenceArray[counter][1]).doubleValue(), (double) sequenceArray[counter][2], ((Boolean) sequenceArray[counter][3]).booleanValue(), (double) sequenceArray[counter][4], (double) sequenceArray[counter][5]) == 1) {
                     switch ((int)sequenceArray[seqCounter][3]) {
                         case 1: //goes while encoder count is less than desired. next parameter is the desired encoder count.
-                            //double encoderAverage = average4Motors(rf.getCurrentPosition(), rb.getCurrentPosition(), lf.getCurrentPosition(), lb.getCurrentPosition());
-                            double encoderAverage = averageEncoders();
-                            double encoderError = ((double)sequenceArray[seqCounter][4] * countsPerInch) - encoderAverage;
-                            double encoderSpeed = (encoderError * (double)sequenceArray[seqCounter][9]) + (double)sequenceArray[seqCounter][8];
-                            if(encoderSpeed > (double)sequenceArray[seqCounter][7]){
+                            double encoderAverage = averageEncoders(); //get current position of the encoders
+                            double encoderError = ((double)sequenceArray[seqCounter][4] * countsPerInch) - encoderAverage; //encoderError = target encoder distance - current encoder position
+                            double encoderSpeed = (encoderError * (double)sequenceArray[seqCounter][9]) + (double)sequenceArray[seqCounter][8]; // Speed = error*gain + minSpeed
+                            if(encoderSpeed > (double)sequenceArray[seqCounter][7]){ //If the speed is greater than the maxSpeed, set the speed to the max speed
                                 encoderSpeed = (double)sequenceArray[seqCounter][7];
                             }
-                            else if(encoderSpeed < (double)sequenceArray[seqCounter][8]){
+                            else if(encoderSpeed < (double)sequenceArray[seqCounter][8]){ //If the speed is less than the minSpeed, set the speed to the min speed
                                 encoderSpeed = (double)sequenceArray[seqCounter][8];
                             }
 
-                            if(encoderError > 0){
+                            if(encoderError > 0){ //Move the robot while the encoderError is greater than 0
                                 drive.slideAngleIMU((int) sequenceArray[seqCounter][1], encoderSpeed, true, (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]);
                             }
                             else{
@@ -821,10 +810,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                             if(drive.slideAngleIMU(((Integer) sequenceArray[seqCounter][1]).doubleValue(), (double) sequenceArray[seqCounter][2], backEncoder > (double)sequenceArray[seqCounter][4], (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]) == 1){
                                 telemetry.addData("state", "slide encoder ");
                                 telemetry.addData("Encoder average", backEncoder);
-                                //data.addField(rf.getCurrentPosition());
-                               // data.addField(rb.getCurrentPosition());
-                               // data.addField(lf.getCurrentPosition());
-                                //data.addField(lb.getCurrentPosition());
+
                                 data.newLine();
                             }
                             else{
@@ -835,17 +821,17 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                             break;
                         case 3: //goes while US level is greater than desired
                             //Parameters: Angle, Max Power, Case, Min Power, gain, desired distance, orientation, oGain
-                            double currentDistance = ultrasonic.cmUltrasonic();
-                            double error = currentDistance - (double)sequenceArray[seqCounter][6];
-                            double speed = (double)sequenceArray[seqCounter][4] + (error * (double)sequenceArray[seqCounter][5]);
-                            if(speed > (double)sequenceArray[seqCounter][2]){
+                            double currentDistance = ultrasonic.cmUltrasonic(); //get the current ultrasonic value
+                            double error = currentDistance - (double)sequenceArray[seqCounter][6]; //error = current distance - desired distance
+                            double speed = (double)sequenceArray[seqCounter][4] + (error * (double)sequenceArray[seqCounter][5]); //s[eed to minSpeed + (error * gain)
+                            if(speed > (double)sequenceArray[seqCounter][2]){ //if the speed is greater than the maxSpeed, set the speed to the maxSpeed
                                 speed = (double)sequenceArray[seqCounter][2];
                             }
-                            else if(speed < (double)sequenceArray[seqCounter][4]){
+                            else if(speed < (double)sequenceArray[seqCounter][4]){ // If the speed is less than the minSpeed, set the speed to the minSpeed
                                 speed = (double)sequenceArray[seqCounter][4];
                             }
 
-                            if(error > 0){
+                            if(error > 0){ //Move the robot while the calculated error is greater than 0. It will stop once the distance has been reached
                                 drive.slideAngleIMU(((Integer) sequenceArray[seqCounter][1]).doubleValue(), speed, true, (double) sequenceArray[seqCounter][7], (double) sequenceArray[seqCounter][8]);
                                 telemetry.addData("current distance", currentDistance);
                                 telemetry.addData("error", error);
@@ -858,14 +844,6 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                                 seqCounter++;
                             }
 
-                            /*if(drive.slideAngleIMU(((Integer) sequenceArray[seqCounter][1]).doubleValue(), (double) sequenceArray[seqCounter][2], ultrasonic.cmUltrasonic() > (double)sequenceArray[seqCounter][4] , (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]) == 1){
-                                telemetry.addData("state", ultrasonic.cmUltrasonic());
-                            }
-                            else{
-                                timer.reset();
-                                drive.resetEncoders();
-                                seqCounter++;
-                            }*/
                             break;
 
                         case 4: //goes while US level is less than desired
@@ -903,7 +881,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                                 seqCounter++;
                             }
                             break;
-                        case 7: //INSERT Comments
+                        case 7: //Moves only if we have a color detected
                             if (rightOrLeft.equals("red, blue")|| rightOrLeft.equals("blue, red")) {
                                 if (drive.slideAngleIMU(((Integer) sequenceArray[seqCounter][1]).doubleValue(), (double) sequenceArray[seqCounter][2], ultrasonic.cmUltrasonic() > (double) sequenceArray[seqCounter][4], (double) sequenceArray[seqCounter][5], (double) sequenceArray[seqCounter][6]) == 1) {
                                     telemetry.addData("state", ultrasonic.cmUltrasonic());
@@ -921,7 +899,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     }
                     break;
 
-                case stop:
+                case stop: //Stops robot
                     drive.setPowerAll(0, 0, 0, 0);
                     timer.reset();
                     telemetry.addData("state", "stop");
@@ -932,13 +910,13 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     telemetry.addData("blank count", blueCount);
                     break;
 
-                case shooterWheel:
+                case shooterWheel: //Sets shooter wheel to specific power
                     shooter.setPower((double) sequenceArray[seqCounter][1]);
                     seqCounter++;
                     timer.reset();
                     break;
 
-                case triggerGate:
+                case triggerGate: //Releases both particles
                     // Shoot first particle by opening gate.
                     if(timer.seconds() < shooterGateOpenTime)
                         shooterGate.setPosition(shooterGateOpen);
@@ -949,7 +927,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     }
                     break;
 
-                case pivotRobot:
+                case pivotRobot: //Pivots robot to a desired angle
                     // pivot to angle for a certain time
                     if (timer.seconds()<(int) sequenceArray[seqCounter][3]){
                         drive.pivotToAngleIMU((double) sequenceArray[seqCounter][1], (double) sequenceArray[seqCounter][2], true, (double) sequenceArray[seqCounter][4],(double) sequenceArray[seqCounter][5]);
@@ -980,6 +958,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     }
     @Override
     public void stop(){
+        //Write IMU calibration file, so we can read the file in teleop
         super.stop();
         String filename = "lastGyroValue.txt";
         File file = AppUtil.getInstance().getSettingsFile(filename);
