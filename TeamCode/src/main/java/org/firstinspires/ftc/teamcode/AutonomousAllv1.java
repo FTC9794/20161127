@@ -230,11 +230,6 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
     //Array for full red autonomous
     Object [][] redFullArray = {
-            // STEP 1. START
-            {stateMachine.start},
-
-            //STEP 2. Add a delay in seconds if needed
-            {stateMachine.timeDelay, 0},
 
             // Slide State Parameters
             //      Angle -- Angle at which you slide
@@ -245,6 +240,95 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             //      Gain for the angle correction
             // STEP 3. Move at a 45 degree angle until encoders are past -4100 at power 1
             // Robot is at 0 orientation (facing forward) )
+
+
+            // STEP 1. START
+            {stateMachine.start},
+
+            //STEP 2. Add a delay in seconds if needed
+            {stateMachine.timeDelay, 0},
+
+            //STEP 3. Slide 36 inches at 135 degrees
+            {stateMachine.slideState, 135, null, 1, 36.0, 0.0, allPowerGain, allPower, lowPower, 1.0},
+
+            //STEP 4. Move towards wall until ultrasonic reads 25, then 15
+            {stateMachine.slideState, 90, allPower, 3, midPower, 0.01, 25.0, 0.0, highGain},
+            {stateMachine.slideState, 135, allPower, 3, midPower, 0.01, 15.0, 0.0, midGain},
+
+            //STEP 5. Move forward at slow speed until we see the line
+            {stateMachine.slideState, 180, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+
+            //STEP 6. Get in position to read color
+            {stateMachine.slideState, 0, null, 1, 2.0, 0.0, midGain, midPower, lowPower, 0.00004},
+
+            //STEP 7. Read color
+            {stateMachine.getColor},
+
+            //STEP 8. Line up to beacon
+            {stateMachine.slideState, 180, null, 1, 2.0, 0.0, midGain, midPower, lowPower, 0.00004},
+
+            //STEP 9. Extend correct beacon pusher
+            {stateMachine.pushBeacon, 1, "red"}, //0 is retract, 1 is extend
+
+            //STEP 10. Slide towards beacon with beacon pusher extended
+            {stateMachine.slideState, 90, allPower, 3, highPower, 0.01, 7.0, 0.0, highGain},
+
+            //STEP 11. Start shooter wheel
+            {stateMachine.shooterWheel, shooterWheelPower},
+
+            //STEP 12. Back off the wall to the shooting distance from the wall
+            {stateMachine.slideState, 270, highPower, 4, shootingDistance, 0.0, highGain},
+
+            //STEP 13. Retract Beacon Pusher
+            {stateMachine.pushBeacon, 0, "red"}, // retracts beacon pusher
+
+            //STEP 14-15. Shoot 1st particle, wait, shoot second particle.
+            {stateMachine.triggerGate, shooterGateOpenTime},
+            //Set 0 power to shooter
+            {stateMachine.shooterWheel, 0.0},
+
+            //STEP 16. Slide at 130 degrees towards the wall
+            {stateMachine.slideState, 130, allPower, 3, highPower, 0.01, 15.0, 0.0, highGain},
+
+            //STEP 17. Slide fast for 15 inches towards beacon line
+            {stateMachine.slideState, 180, null, 1, 18.0, 0.0, midGain, allPower, allPower, 0.00004},
+
+            //STEP 18. Slide to second white line at slow speed
+            {stateMachine.slideState, 180, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
+
+            //STEP 19. Get in position to read color
+            {stateMachine.slideState, 0, null, 1, 2.0, 0.0, midGain, midPower, lowPower, 0.00004},
+
+            //STEP 20. Read color
+            {stateMachine.getColor},
+
+            //STEP 21. Line up to beacon
+            {stateMachine.slideState, 180, null, 1, 2.0, 0.0, midGain, midPower, lowPower, 0.00004},
+
+            //STEP 22. Extend correct beacon pusher
+            {stateMachine.pushBeacon, 1, "red"}, //0 is retract, 1 is extend
+
+            //STEP 23. Slide towards beacon with beacon pusher extended
+            {stateMachine.slideState, 90, allPower, 3, highPower, 0.01, 7.0, 0.0, highGain},
+
+            //STEP 24. Back off wall
+            {stateMachine.slideState, 270, highPower, 4, 35.0, 0.0, highGain},
+
+            //STEP 25. Retract beacon pusher
+            {stateMachine.pushBeacon, 0, "red"}, //retracts beacon
+
+            //STEP 26. Pivot robot to 330
+            {stateMachine.pivotRobot, 330, 0.01, 1, highPower, lowPower/3},
+
+            //STEP 27. Drive at full power to cap ball to push it and park
+            {stateMachine.slideState, 0, null, 1, 44.0, 330.0, allPowerGain, allPower, allPower, 0.00004},
+
+            //STEP 28. Stop robot
+            {stateMachine.stop},
+
+
+
+            /*
             {stateMachine.slideState, 135, allPower, 1, 2050.0, 0.0, allPowerGain},
 
 
@@ -284,9 +368,9 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             // A new case in slideState to be able to skip if the beacon is not detected
             {stateMachine.slideState, 90, highPower, 7, pushBeaconDistance, 0.0, midGain},
 
-
+*/
             // STEP 13. Start wheel shooter
-            {stateMachine.shooterWheel, shooterWheelPower},
+           /* {stateMachine.shooterWheel, shooterWheelPower},
 
             // STEP 14. Back off the wall to the shooting distance from the wall
             {stateMachine.slideState, 270, highPower, 4, shootingDistance, 0.0, highGain},
@@ -338,7 +422,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
             // STEP 32. slide to cap ball
             {stateMachine.slideState, 315, allPower, 5, 3.0, 0.0, allPowerGain},
-            {stateMachine.stop},
+            {stateMachine.stop},*/
     };
 
     //Array for slide and shoot program for blue alliance
@@ -360,13 +444,18 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             //STEP 3. Start shooter
             {stateMachine.shooterWheel, shooterWheelPower},
 
+
             //STEP 4. Slide at -45 degrees until -3300 enconder counts at orientation 0.0
-            {stateMachine.slideState, -45, allPower, 2, -1900.0, 0.0, allPowerGain},
+            {stateMachine.slideState, -45, null, 1, 40.0, 0.0, allPowerGain, allPower, highPower, 1.0},
+            // {stateMachine.slideState, -45, allPower, 2, -1900.0, 0.0, allPowerGain},
 
 
             //STEP 5. Slide at 0 degrees until -820 encoder counts at orientation 0.0
-            {stateMachine.slideState, 0, highPower, 2, -700.0, 0.0, highGain},
-            {stateMachine.slideState, 0, lowPower, 2, -700.0, 0.0, lowGain},
+            {stateMachine.slideState, 0, null, 1, 12.0, 0.0, midGain, midPower, midPower, 1.0},
+            {stateMachine.slideState, 0, null, 1, 12.0, 0.0, lowGain, lowPower, lowPower, 1.0},
+
+            //{stateMachine.slideState, 0, highPower, 2, -700.0, 0.0, highGain},
+            //{stateMachine.slideState, 0, lowPower, 2, -700.0, 0.0, lowGain},
 
 
             //STEP 6. Shoot
@@ -377,10 +466,12 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.shooterWheel, 0.0},
 
             //STEP 8. Push Cap ball
-            {stateMachine.slideState, 300, highPower, 2, -750.0, 0.0, highGain},
+            {stateMachine.slideState, 300, null, 1, 12.0, 0.0, midGain, midPower, midPower, 1.0},
+            //{stateMachine.slideState, 300, highPower, 2, -750.0, 0.0, highGain},
 
             //STEP 9. Move back to shooting position
-            {stateMachine.slideState, 120, highPower, 1, 750.0, 0.0, highGain},
+            {stateMachine.slideState, 120, null, 1, 12.0, 0.0, midGain, midPower, midPower, 1.0},
+            //{stateMachine.slideState, 120, highPower, 1, 750.0, 0.0, highGain},
 
             //STEP 8. Slide at 0 degrees until -3300 encoder counts to push cap ball
             {stateMachine.slideState, 270, allPower, 5, 2.0, 0.0, allPowerGain},
@@ -409,27 +500,34 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.shooterWheel, shooterWheelPower},
 
             //STEP 4. Slide at -45 degrees until -3300 enconder counts at orientation 0.0
-            {stateMachine.slideState, -135, allPower, 1, 3800.0, 0.0, allPowerGain},
+            {stateMachine.slideState, -135, null, 1, 40.0, 0.0, allPowerGain, allPower, highPower, 1.0},
+            //{stateMachine.slideState, -135, allPower, 1, 3800.0, 0.0, allPowerGain},
 
             //STEP 5. Slide at 0 degrees until -820 encoder counts at orientation 0.0
-            {stateMachine.slideState, 180, highPower, 1, 700.0, 0.0, highGain},
-            {stateMachine.slideState, 180, lowPower, 1, 700.0, 0.0, lowGain},
+            {stateMachine.slideState, 180, null, 1, 12.0, 0.0, midGain, midPower, midPower, 1.0},
+            {stateMachine.slideState, 180, null, 1, 12.0, 0.0, lowGain, lowPower, lowPower, 1.0},
+            //{stateMachine.slideState, 180, highPower, 1, 700.0, 0.0, highGain},
+            //{stateMachine.slideState, 180, lowPower, 1, 700.0, 0.0, lowGain},
 
             //STEP 6. Shoot
             {stateMachine.triggerGate, shooterGateOpenTime},
             {stateMachine.timeDelay, 2}, // If you want to wait before starting, start here
             {stateMachine.triggerGate, shooterGateOpenTime},
+
             //STEP 7. Stop shooter
             {stateMachine.shooterWheel, 0.0},
 
             //STEP 8. Push Cap ball
-            {stateMachine.slideState, 250, highPower, 1, 2000.0, 0.0, highGain},
+            {stateMachine.slideState, 250, null, 1, 12.0, 0.0, midGain, midPower, midPower, 1.0},
+            //{stateMachine.slideState, 250, highPower, 1, 2000.0, 0.0, highGain},
 
             //STEP 9. Move back to shooting position
-            {stateMachine.slideState, 70, highPower, 2, -2000.0, 0.0, highGain},
+            {stateMachine.slideState, 70, null, 1, 12.0, 0.0, midGain, midPower, midPower, 1.0},
+            //{stateMachine.slideState, 70, highPower, 2, -2000.0, 0.0, highGain},
 
             //STEP 8. Slide at 0 degrees until -3300 encoder counts to push cap ball
-            {stateMachine.slideState, 270, allPower, 5, 1.5, 0.0, allPowerGain},
+            {stateMachine.slideState, 270, allPower, 5, 2.0, 0.0, allPowerGain},
+            //{stateMachine.slideState, 270, allPower, 5, 1.5, 0.0, allPowerGain},
 
             //STEP 9. Stop program, move to final state
             {stateMachine.stop},
