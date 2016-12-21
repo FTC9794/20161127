@@ -48,10 +48,13 @@ public class LinearTeleOpAllCapBall extends LinearOpMode{
     double offset;
     double shootingSpeed = .325;
     double capBallIncrement = 0;
-    double leftBottomCapBallStart = 0.05;
-    double rightBottomCapBallStart = 0.95;
-    double leftCapBallOpenPosition = 0.7;
-    double rightCapBallOpenPosition = .3;
+    double leftBottomCapBallStart = 0;
+    double rightBottomCapBallStart = 1;
+    double leftCapBallOpenPosition = 0.65;
+    double rightCapBallOpenPosition = .35;
+    double leftCapBallSqueezePosition = .5;
+    double rightCapBallSqueezePosition = .5;
+
     @Override
     public void runOpMode() throws InterruptedException {
         rf = hardwareMap.dcMotor.get("right_front");
@@ -203,42 +206,17 @@ public class LinearTeleOpAllCapBall extends LinearOpMode{
             if(gamepad2.a){
                 sweeper.setPower(-1);
             }
+
             if(gamepad2.dpad_left){
-                capBallIncrement+=.01;
-                if(capBallIncrement>1){
-                    capBallIncrement=1;
-                }
-                if(capBallIncrement + leftBottomCapBallStart>leftCapBallOpenPosition){
-                    leftBottomCapBall.setPosition(leftCapBallOpenPosition);
-                }else{
-                    leftBottomCapBall.setPosition(leftBottomCapBallStart+capBallIncrement);
-                }
-                if(rightBottomCapBallStart - capBallIncrement < rightCapBallOpenPosition){
-                    rightBottomCapBall.setPosition(rightCapBallOpenPosition);
-                }else{
-                    rightBottomCapBall.setPosition(rightBottomCapBallStart-capBallIncrement);
-                }
-
+                leftBottomCapBall.setPosition(leftCapBallOpenPosition);
+                rightBottomCapBall.setPosition(rightCapBallOpenPosition);
+            }else if(gamepad2.dpad_right){
+                leftBottomCapBall.setPosition(leftBottomCapBallStart);
+                rightBottomCapBall.setPosition(rightBottomCapBallStart);
+            }else if(gamepad2.dpad_up){
+                leftBottomCapBall.setPosition(leftCapBallSqueezePosition);
+                rightBottomCapBall.setPosition(rightCapBallSqueezePosition);
             }
-            telemetry.addData("increment", capBallIncrement);
-            if(gamepad2.dpad_right){
-                capBallIncrement-=.01;
-                if(capBallIncrement<0){
-                    capBallIncrement=0;
-                }
-                if(leftBottomCapBallStart - capBallIncrement < leftBottomCapBallStart){
-                    leftBottomCapBall.setPosition(leftBottomCapBallStart);
-                }else{
-                    leftBottomCapBall.setPosition(leftBottomCapBallStart-capBallIncrement);
-                }
-                if(capBallIncrement + rightBottomCapBallStart<rightBottomCapBallStart){
-                    rightBottomCapBall.setPosition(rightBottomCapBallStart);
-                }else{
-                    rightBottomCapBall.setPosition(rightBottomCapBallStart-capBallIncrement);
-                }
-
-            }
-            telemetry.update();
         }
     }
 }
