@@ -84,7 +84,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     // Shooter and shooter gate
     double shooterGateOpen = 0;
     double shooterGateClosed = 0.5;
-    double shooterGateOpenTime = 1.0;
+    double shooterGateOpenTime = 1.5;
     double shooterWheelPower = 0.41;
 
     //Max Encder Ticks Per Seconds for our Shooter Motor
@@ -250,17 +250,17 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.timeDelay, 0},
 
             //STEP 3. Slide 36 inches at 135 degrees
-            {stateMachine.slideState, 135, null, 1, 36.0, 0.0, allPowerGain, allPower, lowPower, 1.0},
+            {stateMachine.slideState, 135, null, 1, 25.0, 0.0, allPowerGain, allPower, lowPower, 1.0},
 
             //STEP 4. Move towards wall until ultrasonic reads 25, then 15
-            {stateMachine.slideState, 90, allPower, 3, midPower, 0.01, 25.0, 0.0, highGain},
+            {stateMachine.slideState, 90, allPower, 3, midPower, 0.01, 29.0, 0.0, highGain},
             {stateMachine.slideState, 135, allPower, 3, midPower, 0.01, 15.0, 0.0, midGain},
 
             //STEP 5. Move forward at slow speed until we see the line
             {stateMachine.slideState, 180, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
 
             //STEP 6. Get in position to read color
-            {stateMachine.slideState, 0, null, 1, 2.0, 0.0, midGain, midPower, lowPower, 0.00004},
+            {stateMachine.slideState, 0, null, 1, 4.0, 0.0, midGain, midPower, lowPower, 0.00004},
 
             //STEP 7. Read color
             {stateMachine.getColor},
@@ -283,6 +283,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             //STEP 13. Retract Beacon Pusher
             {stateMachine.pushBeacon, 0, "red"}, // retracts beacon pusher
 
+
             //STEP 14-15. Shoot 1st particle, wait, shoot second particle.
             {stateMachine.triggerGate, shooterGateOpenTime},
             //Set 0 power to shooter
@@ -292,13 +293,13 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.slideState, 130, allPower, 3, highPower, 0.01, 15.0, 0.0, highGain},
 
             //STEP 17. Slide fast for 15 inches towards beacon line
-            {stateMachine.slideState, 180, null, 1, 18.0, 0.0, midGain, allPower, allPower, 0.00004},
+            {stateMachine.slideState, 180, null, 1, 13.0, 0.0, midGain, allPower, allPower, 0.00004},
 
             //STEP 18. Slide to second white line at slow speed
             {stateMachine.slideState, 180, lowPower, 6, whiteLightTrigger, 0.0, lowGain},
 
             //STEP 19. Get in position to read color
-            {stateMachine.slideState, 0, null, 1, 2.0, 0.0, midGain, midPower, lowPower, 0.00004},
+            {stateMachine.slideState, 0, null, 1, 4.0, 0.0, midGain, midPower, lowPower, 0.00004},
 
             //STEP 20. Read color
             {stateMachine.getColor},
@@ -319,11 +320,10 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.pushBeacon, 0, "red"}, //retracts beacon
 
             //STEP 26. Pivot robot to 330
-            {stateMachine.pivotRobot, 330, 0.01, 1, highPower, lowPower/3},
+            {stateMachine.pivotRobot, 330.0, 0.01, 1, highPower, lowPower/3},
 
             //STEP 27. Drive at full power to cap ball to push it and park
-            {stateMachine.slideState, 0, null, 1, 44.0, 330.0, allPowerGain, allPower, allPower, 0.00004},
-
+            {stateMachine.slideState, 0, null, 1, 48.0, -30.0, allPowerGain, allPower, allPower, 0.00004},
             //STEP 28. Stop robot
             {stateMachine.stop},
 
@@ -841,11 +841,11 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
                     telemetry.addData("color", rightOrLeft);
                     if ((int) sequenceArray[seqCounter][1] == 1) {
                         if(((String)sequenceArray[seqCounter][2]).equals("red")){
-                            if(rightOrLeft.equals("red, blue")){
+                            if(rightColor.equals("blue")){
                                 leftBeacon.setPosition(leftBeaconExtend);
                                 rightBeacon.setPosition(rightBeaconRetract);
                             }
-                            else if(rightOrLeft.equals("blue, red")){
+                            else if(rightColor.equals("red")){
                                 rightBeacon.setPosition(rightBeaconExtend);
                                 leftBeacon.setPosition(leftBeaconRetract);
                             }else{
