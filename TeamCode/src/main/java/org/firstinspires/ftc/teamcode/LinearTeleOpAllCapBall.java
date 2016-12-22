@@ -52,8 +52,8 @@ public class LinearTeleOpAllCapBall extends LinearOpMode{
     double rightBottomCapBallStart = 1;
     double leftCapBallOpenPosition = 0.65;
     double rightCapBallOpenPosition = .35;
-    double leftCapBallSqueezePosition = .5;
-    double rightCapBallSqueezePosition = .5;
+    double leftCapBallSqueezePosition = .45;
+    double rightCapBallSqueezePosition = .55;
 
     @Override
     public void runOpMode() throws InterruptedException {
