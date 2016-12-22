@@ -32,6 +32,8 @@ public class LinearTeleOpAllCapBall extends LinearOpMode{
     Servo shooterGate;
     Servo leftBottomCapBall;
     Servo rightBottomCapBall;
+    Servo leftTopCapBall;
+    Servo rightTopCapBall;
     MecanumDrive drive;
     ElapsedTime shooterTime;
     ElapsedTime shooterToggleTimer;
@@ -80,11 +82,15 @@ public class LinearTeleOpAllCapBall extends LinearOpMode{
         shooterGate = hardwareMap.servo.get("shooter_gate");
         leftBottomCapBall = hardwareMap.servo.get("lb_cap_ball");
         rightBottomCapBall = hardwareMap.servo.get("rb_cap_ball");
+        leftTopCapBall = hardwareMap.servo.get("lt_cap_ball");
+        rightTopCapBall = hardwareMap.servo.get("rt_cap_ball");
         leftBeacon.setPosition(1);
         rightBeacon.setPosition(0);
         shooterGate.setPosition(.5);
         leftBottomCapBall.setPosition(leftBottomCapBallStart);
         rightBottomCapBall.setPosition(rightBottomCapBallStart);
+        leftTopCapBall.setPosition(rightBottomCapBallStart);
+        rightTopCapBall.setPosition(leftBottomCapBallStart);
         shooterToggle = false;
         harvestToggle = false;
 
@@ -210,12 +216,18 @@ public class LinearTeleOpAllCapBall extends LinearOpMode{
             if(gamepad2.dpad_left){
                 leftBottomCapBall.setPosition(leftCapBallOpenPosition);
                 rightBottomCapBall.setPosition(rightCapBallOpenPosition);
+                leftTopCapBall.setPosition(rightCapBallOpenPosition);
+                rightTopCapBall.setPosition(leftCapBallOpenPosition);
             }else if(gamepad2.dpad_right){
                 leftBottomCapBall.setPosition(leftBottomCapBallStart);
                 rightBottomCapBall.setPosition(rightBottomCapBallStart);
+                leftTopCapBall.setPosition(rightBottomCapBallStart);
+                rightTopCapBall.setPosition(leftBottomCapBallStart);
             }else if(gamepad2.dpad_up){
                 leftBottomCapBall.setPosition(leftCapBallSqueezePosition);
                 rightBottomCapBall.setPosition(rightCapBallSqueezePosition);
+                leftTopCapBall.setPosition(rightCapBallSqueezePosition);
+                rightTopCapBall.setPosition(leftCapBallSqueezePosition);
             }
         }
     }

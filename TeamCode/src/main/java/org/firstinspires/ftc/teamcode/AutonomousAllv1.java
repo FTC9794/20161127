@@ -46,7 +46,10 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
     // State used for updating telemetry
     Servo leftBeacon, rightBeacon, shooterGate;
-    Servo leftBottomCapBall, rightBottomCapBall;
+    Servo leftBottomCapBall;
+    Servo rightBottomCapBall;
+    Servo leftTopCapBall;
+    Servo rightTopCapBall;
 
 
     ModernRoboticsI2cRangeSensor ultrasonic;
@@ -76,10 +79,6 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     //Holds data for beacon color detection
     String rightOrLeft = "";
     String rightColor = "";
-
-    //Cap Ball Starting Servo Positions
-    double leftBottomCapBallStart = 1.0;
-    double rightBottomCapBallStart = 0.0;
 
     // Shooter and shooter gate
     double shooterGateOpen = 0;
@@ -124,6 +123,13 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
     //Starting delay
     int autoStartDelay = 0;
+
+    double leftBottomCapBallStart = 0;
+    double rightBottomCapBallStart = 1;
+    double leftCapBallOpenPosition = 0.65;
+    double rightCapBallOpenPosition = .35;
+    double leftCapBallSqueezePosition = .45;
+    double rightCapBallSqueezePosition = .55;
 
 
     public static double endGyro;
@@ -447,7 +453,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
 
             //STEP 4. Slide at -45 degrees until -3300 enconder counts at orientation 0.0
-            {stateMachine.slideState, -45, null, 1, 40.0, 0.0, allPowerGain, allPower, highPower, 1.0},
+            {stateMachine.slideState, -45, null, 1, 23.0, 0.0, allPowerGain, allPower, highPower, 1.0},
             // {stateMachine.slideState, -45, allPower, 2, -1900.0, 0.0, allPowerGain},
 
 
@@ -467,11 +473,11 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.shooterWheel, 0.0},
 
             //STEP 8. Push Cap ball
-            {stateMachine.slideState, 300, null, 1, 12.0, 0.0, midGain, midPower, midPower, 1.0},
+            {stateMachine.slideState, 285, null, 1, 12.0, 0.0, midGain, midPower, midPower, 1.0},
             //{stateMachine.slideState, 300, highPower, 2, -750.0, 0.0, highGain},
 
             //STEP 9. Move back to shooting position
-            {stateMachine.slideState, 120, null, 1, 12.0, 0.0, midGain, midPower, midPower, 1.0},
+            {stateMachine.slideState, 105, null, 1, 12.0, 0.0, midGain, midPower, midPower, 1.0},
             //{stateMachine.slideState, 120, highPower, 1, 750.0, 0.0, highGain},
 
             //STEP 8. Slide at 0 degrees until -3300 encoder counts to push cap ball
@@ -501,7 +507,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.shooterWheel, shooterWheelPower},
 
             //STEP 4. Slide at -45 degrees until -3300 enconder counts at orientation 0.0
-            {stateMachine.slideState, -135, null, 1, 40.0, 0.0, allPowerGain, allPower, highPower, 1.0},
+            {stateMachine.slideState, -135, null, 1, 23.0, 0.0, allPowerGain, allPower, highPower, 1.0},
             //{stateMachine.slideState, -135, allPower, 1, 3800.0, 0.0, allPowerGain},
 
             //STEP 5. Slide at 0 degrees until -820 encoder counts at orientation 0.0
@@ -636,6 +642,8 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
         leftBottomCapBall = hardwareMap.servo.get("lb_cap_ball");
         rightBottomCapBall = hardwareMap.servo.get("rb_cap_ball");
+        leftTopCapBall = hardwareMap.servo.get("lt_cap_ball");
+        rightTopCapBall = hardwareMap.servo.get("rt_cap_ball");
 
         leftBeacon.setPosition(leftBeaconRetract);
         rightBeacon.setPosition(rightBeaconRetract);
@@ -643,6 +651,8 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
         leftBottomCapBall.setPosition(leftBottomCapBallStart);
         rightBottomCapBall.setPosition(rightBottomCapBallStart);
+        leftTopCapBall.setPosition(rightBottomCapBallStart);
+        rightTopCapBall.setPosition(leftBottomCapBallStart);
 
         //make it so when the powers are set to 0, the motors will stop and not move
         rf.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
