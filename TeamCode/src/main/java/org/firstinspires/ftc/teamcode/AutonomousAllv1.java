@@ -58,7 +58,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
     //states in sequencer
     enum stateMachine {
-        start, timeDelay, slideState, getColor, pushBeacon, shooterWheel, triggerGate, stop, pivotRobot
+        start, timeDelay, slideState, getColor, pushBeacon, shooterWheel, triggerGate, stop, pivotRobot, sweeper
     };
 
     //Create State Machine Object
@@ -85,6 +85,8 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
     double shooterGateClosed = 0.5;
     double shooterGateOpenTime = 1.5;
     double shooterWheelPower = 0.41;
+
+    double sweepOutPower = -1.0;
 
     //Max Encder Ticks Per Seconds for our Shooter Motor
     int shooterEncoderMax = 3080;
@@ -438,7 +440,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.start},
 
             //STEP 2. Add a delay in seconds if needed
-            {stateMachine.timeDelay, 7},
+            {stateMachine.timeDelay, 0},
 
             // Slide State Parameters
             //      Angle -- Angle at which you slide
@@ -448,8 +450,9 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             //      Orientation -- Orientation for the robot
             //      Gain for the angle correction
 
-            //STEP 3. Start shooter
+            //STEP 3. Start shooter and wheel
             {stateMachine.shooterWheel, shooterWheelPower},
+            {stateMachine.sweeper, sweepOutPower},
 
 
             //STEP 4. Slide at -45 degrees until -3300 enconder counts at orientation 0.0
@@ -459,7 +462,7 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
             //STEP 5. Slide at 0 degrees until -820 encoder counts at orientation 0.0
             {stateMachine.slideState, 0, null, 1, 12.0, 0.0, midGain, midPower, midPower, 1.0},
-            {stateMachine.slideState, 0, null, 1, 12.0, 0.0, lowGain, lowPower, lowPower, 1.0},
+            {stateMachine.slideState, 0, null, 1, 6.0, 0.0, lowGain, lowPower, lowPower, 1.0},
 
             //{stateMachine.slideState, 0, highPower, 2, -700.0, 0.0, highGain},
             //{stateMachine.slideState, 0, lowPower, 2, -700.0, 0.0, lowGain},
@@ -473,16 +476,21 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
             {stateMachine.shooterWheel, 0.0},
 
             //STEP 8. Push Cap ball
-            {stateMachine.slideState, 285, null, 1, 12.0, 0.0, midGain, midPower, midPower, 1.0},
+            //{stateMachine.slideState, 285, null, 1, 12.0, 0.0, midGain, highPower, midPower, 1.0},
             //{stateMachine.slideState, 300, highPower, 2, -750.0, 0.0, highGain},
 
             //STEP 9. Move back to shooting position
-            {stateMachine.slideState, 105, null, 1, 12.0, 0.0, midGain, midPower, midPower, 1.0},
+            //{stateMachine.slideState, 105, null, 1, 12.0, 0.0, midGain, highPower, midPower, 1.0},
             //{stateMachine.slideState, 120, highPower, 1, 750.0, 0.0, highGain},
 
             //STEP 8. Slide at 0 degrees until -3300 encoder counts to push cap ball
+            {stateMachine.pivotRobot, 30.0, 0.01, 1, highPower, lowPower/3},
+
+            {stateMachine.stop},
+
             {stateMachine.slideState, 270, allPower, 5, 2.0, 0.0, allPowerGain},
 
+            {stateMachine.sweeper, 0.0},
             //STEP 9. Stop program, move to final state
             {stateMachine.stop},
     };
@@ -1021,6 +1029,13 @@ public class AutonomousAllv1 extends LinearVisionOpMode {
 
                 case shooterWheel: //Sets shooter wheel to specific power
                     shooter.setPower((double) sequenceArray[seqCounter][1]);
+                    seqCounter++;
+                    timer.reset();
+                    break;
+
+
+                case sweeper://Sets sweeper to specific power
+                    sweeper.setPower((double) sequenceArray[seqCounter][1]);
                     seqCounter++;
                     timer.reset();
                     break;
